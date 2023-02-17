@@ -1,0 +1,130 @@
+body {
+  margin: 0;
+}
+
+.CreateAccount {
+  width: 100%;
+  height: 100vh;
+  display: grid;
+  /* La propiedad shorthand "place-items" permite establecer los valores de las propiedades "align-items" y "justify-items" en una sola declaración.  
+        - Primer parámetro: establece el valor de la propiedad "align-items". 
+        - Segundo parámetro: establece el valor de la propiedad "justify-items". 
+
+      * Si se omite el segundo valor, el primer valor se aplica a AMBAS propiedades. 
+
+      En este caso, el valor "center" se asigna tanto a la propiedad "align-items" como a la propiedad "justify-items". 
+  */
+  place-items: center;
+}
+
+.CreateAccount-container {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 300px;
+
+  height: 100%;
+}
+
+.title {
+  font-size: var(--lg);
+  margin-bottom: 12px;
+
+  /* La propiedad "text-align" permite alinear el texto dentro de su elemento contenedor. 
+                           Sus valores son: 
+                           - left
+                           - right 
+                           - center
+                           - justify
+
+      IMPORTANTE: 
+      También hay dos nuevos valores en CSS3, inicio y fin. Estos valores facilitan la compatibilidad con varios idiomas Por ejemplo, el inglés es un idioma de izquierda a derecha (ltr) y el árabe es un idioma de derecha a izquierda (rtl). Usar "derecha" e "izquierda" para los valores es demasiado rígido y no se adapta a medida que cambia la dirección. Estos nuevos valores se adaptan:
+
+        - start: igual que "izquierda" en ltr (idioma de izquierda a derecha), igual que "derecha" en rtl (idioma de derecha a izquierda). 
+        - end: igual que "right" en ltr, igual que "left" en rtl.
+     */
+  text-align: start;
+  margin-bottom: 36px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+  justify-content: space-between;
+}
+
+/* Es necesario aplicar también al "div" la propiedad "display: flex" y la propiedad "flex-direction: column", para que los elementos que sencuentran
+    dentro del "div" se alineen en columnas.  */
+.form div {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: var(--sm);
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.input {
+  background-color: ar(--text-input-field);
+  /* Se quita el borde por defecto de los "input". */
+  border: none;
+  border-radius: 8px;
+  height: 30px;
+  font-size: var(--md);
+  padding: 6px;
+  margin-bottom: 12px;
+}
+
+.input-name,
+.input-email,
+.input-password {
+  margin-bottom: 22px;
+}
+
+.primary-button {
+  background-color: var(--hospital-green);
+  border-radius: 8px;
+  /* Se quita el borde por defecto del "input" de tipo "submit". */
+  border: none;
+  color: var(--white);
+  width: 100%;
+  cursor: pointer;
+  font-size: var(--md);
+  font-weight: bold;
+  height: 50px;
+}
+
+.login-button {
+  margin-top: 14px;
+  margin-bottom: 30px;
+}
+
+@media screen and (min-width: 640px) {
+  .form {
+    /* 
+        height: 100%;
+        justify-content: space-between;
+        */
+
+    /* IMPORTANTE: se asignó a la propiedad "height" el valor "auto", porque en la clase "form" que se modificó
+        anteriormente, se asignó una altura del "100%", pero esa altura es la que se desea únicamente para dispositivos móviles (mobile first), 
+        por lo que para que en pantallas mayores a 640px el formulario se vea con el tamaño original, 
+        se le asigna el valor "auto". */
+    height: auto;
+    /* Como en la clase "form" que se creó anteriormente, se especificó el valor de la propiedad "justify-content: space-between", 
+        es necesario definir cuál será la alineación para pantallas mayores a 640px. */
+    justify-content: center;
+  }
+
+  .CreateAccount-container {
+    /* height: 100%; */
+    /* IMPORTANTE: se asignó a la propiedad "height" el valor "auto", porque en la clase "form-container" que se modificó
+        anteriormente, se asignó una altura del "100%", pero esa altura es la que se desea únicamente para dispositivos móviles (mobile first), 
+        por lo que para que en pantallas mayores a 640px el formulario se vea con el tamaño original, 
+        se le asigna el valor "auto". */
+    height: auto;
+  }
+}
