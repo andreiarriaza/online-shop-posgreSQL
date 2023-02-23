@@ -1,0 +1,106 @@
+# Se define la versión de YAML que se utilizará.
+# Desde la versión 1.27 de Docker, es OPCIONAL definir o no el atributo "version".
+version: "3.3"
+
+# Se definen los servicios que se utilizarán en Docker.
+services:
+  # Acá puede colocarse el nombre de la base de datos,  sin embargo, como buena práctica, se acostumbra colocar el nombre del servicio que se utilizará, en este caso, el servicio se llama: postgre.
+  # IMPORTANTE: Este servicio se descargará y ejecutará por medio de Docker.
+  postgres:
+    # (opcional) Se le asigna el nombre al contenedor. Puede ser
+    # cualquier nombre, en este caso, se le asignó el mismo nombre del servicio,
+    # pero esto puede cambiar sin ningún problema.
+    container_name: postgres
+    # Se define la versión de PostgreSQL que se usará (correrá) en este contenedor.
+    # Si se agrega el comando "latest", se define que se desea trabajar con la versión
+    # más reciente de PostgreSQL. Si se deseara una versión en específico,
+    # se puede escribir directamente el número de versión deseado.
+    image:
+      postgres:latest
+
+      # Se definen las variables de entorno (envirnoment), las cuales son las que permiten indicar la configuración
+      # inicial que se le asignará a la imagen. En las variables de entorno
+      # puede ir, por ejemplo, la siguiente
+      # información: nombre de base de datos, usuario, password, etc.
+    environment:
+      # El comando "POSTGRES_DB" sirve para definir el nombre de la base de datos deseada.
+      - POSTGRES_DB=my_store
+
+        # Se define el nombre de usuario.
+      - POSTGRES_USER=walter
+
+        # Se define la contraseña del usuario respectivo.
+      - POSTGRES_PASSWORD=123
+
+        # Se define el puerto en el que se ejecutará PostgresSQL. Normalmente PostgreSQL se ejecuta en el puerto "5432".
+    ports:
+      # Este servicio correrá en el puerto de la computadora "5432".
+      # Internamente, correrá en el puerto "5432" del contenedor.
+      - 5432:5432
+
+    volumes:
+      # Los contenedores NO TIENEN ESTADO. Esto significa que al detener la
+      # ejecución de un contenedor, toda la información se borrará. Esto es
+      # precisamente lo contrario de lo que se busca conseguir usando base de    # datos, pues es indispensable que la información de la base de datos
+      # persista (se almacene) aún después de que el contenedor de Docker se
+      # haya detenido. Para corregir este problema, es necesario agregar el
+      # atributo "volumen" al archivo "docker-compose.yml".
+
+      # Se define en qué lugar se desea almacenar la información de la base
+      # de datos del contenedor.
+      # Se almacenará en la carpeta "progress_data" del proyecto actual.
+      # La información del contenedor se almacenará internamente en la carpeta:
+      # /var/lib/postgres/data
+
+      # Esta ruta es específica para "postgreSQL". La ruta para MariaDB o
+      # para MySQL son diferentes.
+      - "./postgres_data:/var/lib/postgresql/data"
+
+  # Este servicio permitirá utilizar la interfaz gráfica para trabajar con
+  # PostgreSQL, la cual se llama "pgAdmin".
+  # IMPORTANTE: Este servicio se descargará y ejecutará por medio de Docker.
+  pgadmin:
+    # (opcional) Se le asigna el nombre al contenedor. Puede ser
+    # cualquier nombre, en este caso, se le asignó el mismo nombre del servicio,
+    # pero esto puede cambiar sin ningún problema.
+    container_name: pgadmin
+
+    # Para poder usar la imagen de 'pgAdmin' es fundamental hacer lo siguiente:
+    # 1. Acceder al sitio web:
+    #  https://hub.docker.com/search?q=pgadmin
+    # 2. Seleccionar la primera opción de descarga, en este ejemplo, la
+    # versión más reciente es: dpage/pgadmin4
+    # 3. Ejecutar el servicio:
+    # docker-compose up -d pgadmin
+
+    # IMPORTANTE: para corroborar que los servicios
+    # se están ejecutando correctamente, se usa el comando:
+    # docker-compose ps
+
+    # Al definir la imagen, se puede definir la versión específica de "pgadmin",
+    # como se muestra en la siguiente línea:
+    # image: dpage/pgadmin4
+
+    # Si no se desea definir la versión específica,
+    # se puede indicar que se desea trabajar con la versión más reciente
+    # utililzando la palabra "latest":
+    image:
+      dpage/pgadmin4
+      # Se definen las variables de entorno (envirnoment), las cuales son las que permiten indicar la configuración
+      # inicial que se le asignará a la imagen.
+    environment:
+      # Se le asigna un correo electrónico por default. El correo
+      # puede ser inventado.
+      - PGADMIN_DEFAULT_EMAIL=admin@mail.com
+      # Se define una contraseña asociada al correo electrónico anterior.
+      - PGADMIN_DEFAULT_PASSWORD=root
+
+    ports:
+      # Este servicio correrá en el puerto de la computadora "5050".
+      # Internamente, correrá en el puerto "80" del contenedor.
+      - 5050:80
+
+      # IMPORTANTE: en este servicio NO es necesario definir un atributo
+      # "volumes" (volúmenes), porque este servicio no necesita
+      # persistencia de datos. El único servicio que necesita persistencia,
+      # es el servicio "postgres", el cual contiene la base de datos.

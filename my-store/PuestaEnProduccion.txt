@@ -1,0 +1,106 @@
+Heroku es una plataforma de servicios en la nube (conocidos como PaaS o Platform as a Service) que permite manejar los servidores y sus configuraciones, escalamiento y la administración. Su popularidad ha crecido en los últimos años debido a su facilidad de uso y versatilidad para distintos proyectos.
+
+    ¿Qué es Heroku?
+Heroku es uno de los PaaS más utilizados en la actualidad en entornos empresariales por su fuerte enfoque en resolver el despliegue de una aplicación. En otras palabras, a Heroku solo le dices qué lenguaje de backend estás utilizando o qué base de datos vas a utilizar y te preocupas únicamente por el desarrollo de tu aplicación.
+
+Si en tu día a día te encuentras desarrollando apps, debes ser consciente que el impacto inicia cuando comienzas a tener usuarios, por esto es importante lanzar tu aplicación sin tener complicaciones de infraestructura, administrar servidores, tus bases de datos y la seguridad que estos deben de tener entre otras cosas.
+
+En el mercado existen una serie de alternativas conocidas como PaaS (Platform as a Service) o “Plataformas como Servicios” que, además de ser la evolución de las IaaS (Infraestructura como Servicio), como EC2 de Amazon donde te dan un servidor y tu te encargas de provisionarlos y administrarlos con PaaS, te puedes olvidar de todas estas cuestiones de administración, pues utilizas directamente una plataforma que lo hace por ti.
+
+Si este tema te interesa pronto lanzaremos un curso para que tú puedas crear tus propios PaaS utilizando Microsoft Azure.
+
+
+    Características de Heroku
+Soporta diferentes lenguajes de programación: Node, Ruby, Java, Clojure, Scala, Go, Python, PHP
+Tiene una versión gratuita fácil de usar
+Ejecuta las aplicaciones a través de sus contenedores, también conocidos como Dynos
+Tiene Dynos que pueden ser de tres tipos: web, worker o cron
+Ofrece más de 200 complementos con los que ampliar las aplicaciones al instante
+Ofrece varias características de seguridad, incluyendo SSL, autenticación y cumplimiento de PCI
+¿Quién utiliza Heroku?
+Heroku tiene su clientela bien definida: empresas que quieren dejar de preocuparse por cuestiones de infraestructura y sólo enfocarse en el desarrollo. Por lo general estas suelen ser empresas grandes o startups que prefieren no invertir en un equipo de operaciones cuando están en una etapa temprana, y su prioridad debe ser hacer un producto que las personas quieran.
+
+Heroku tiene dos tiers, o niveles, para personas interesadas en aprender: una versión gratuita similar a la de now.sh, que entra en modo “sleep” cada 30 minutos sin tráfico, y otra de 7 USD que compite con el servicio básico de 5 USD al mes que ofrece Digital Ocean, pero agregar las ventajas de que nuestros servidores sean administrados por nosotros.
+
+Antes de empezar a entender completamente los beneficios que presenta Heroku, es importante conocer la historia detrás de la computación en la nube y dónde encaja Heroku.
+
+Cómo se relaciona Heroku y la computación en la nube
+La computación en la nube es un paradigma de la tecnología de la información. Es un modelo que permite el acceso a grupos compartidos de recursos configurables de forma ininterrumpida, tales como redes de computadoras, servidores, almacenamiento, aplicaciones y otros servicios.
+
+Los servicios en la nube pueden suministrarse rápidamente con un mínimo esfuerzo de gestión por parte de la empresa, pues la logística de la a dministración de estos servicios está distribuida y funciona desde internet. La nube es una opción atractiva para las empresas con diversas necesidades. Sin embargo, las particularidades del modelo de negocio y las necesidades de cada proyecto determinarán qué proveedor de servicios en la nube será más óptimo para lo que necesitas en tu empresa.
+
+    Heroku y sus beneficios
+heroku beneficios
+Heroku, una solución de plataforma como servicio, es generalmente fácil de usar. Pero es más beneficiosa para las empresas en situaciones específicas. Heroku tiene un modelo de servicio gratuito para proyectos pequeños. Además, existen paquetes de servicios escalonados para los casos en los que hay que atender necesidades empresariales más complejas.
+
+
+
+
+  Instalar Heroku
+
+  1. Registrarse en el sitio web:
+        https://www.heroku.com
+  2. Confirmar en la documentación oficial los pasos a seguir para instalar del CLIENTE de comandos de Heroku (The Heroku CLI):
+        https://devcenter.heroku.com/articles/heroku-cli
+  3. Dentro de la documentación, buscar la sección: Install with an Installer y descargar e instalar el archivo que corresponda
+     con el sistema operativo (es imprescindible haber instalado previamente GIT).
+  4. Para verificar la instalación, desde "Consola de Windows" (no desde la consola integrada de Visual Studio Code) como administrador, se debe escribir el comando:
+        heroku --version
+  5. Nuevamente desde la Consola de Windows (no desde la consola integrada de Visual Studio Code)
+        heroku login
+  6. Presionar cualquier tecla, y se abrirá el navegador, en el cual debemos iniciar sesión en Heroku.
+  7. Desde la consola de Windows, acceder a la carpeta dentro de la cual se encuentra nuestra aplicación, en este
+     ejemplo, la carpeta se llama: "my-store".
+  8. Ejecutar el comando "heroku create" para crear la aplicación en Heroku.
+  9. Agregar el siguiente fragmento al archivo "package.json", dentro del cual se especifica la versión de NODE en  la que nuestra aplicación funciona a la perfección:
+        "engines": {
+          "node": "14.x"
+        },
+
+  10. Si se desea utilizar Heroku de forma local, es necesario ejecutar el siguiente comando:
+        heroku local web
+  11. Definir dentro del código la validación del puerto al que se conectará la API:
+     const port = process.env.PORT || 3000;
+  12. Tanto si se hace por medio de Heroku (de paga), como por medio de Railway, es necesario
+      crear un archivo llamado "Procfile" (sin extensión). Este archivo permite definir cómo se desea que Heroku o Railway lean el proyecto y cómo
+      se desea que sea lanzado. En este caso, se desea que el proyecto sea leído como un proyecto de tipo "web" y
+      se especifica además el comando que servirá para inicializar el proyecto. En este caso, se utilizó el comando: "npm run start".
+        Ejemplo de archivo Procfile:
+            web: npm run start
+
+  13. Desplegar la aplicación en Heroku:
+        git add .
+        git commit -m "Added a Procfile." .
+        git push heroku main
+  14 IMPORTANTE: desde noviembre de 2022, Heroku YA NO PROPORCIONA PLANES GRATUITOS, por lo que, si se desea usarlo, es imprescindible
+    suscribirse a algún plan de pago.
+
+  15. Alternativas a Heroku:
+        https://railway.app/ (recomendada por MiduDev y Fazt)
+        https://render.com/ (también recomendada por Fazt)
+        https://northflank.com/
+        https://www.koyeb.com/
+        https://qoddi.com/
+
+
+Pasos para utilizar Railway App
+
+1. Iniciar sesión en:
+      https://railway.app/
+2. Acceder al "Dashboard".
+3. Seleccionar la opción "New Project".
+4. Seleccionar la opción "Deploy from Github Repo".
+5. Elegir "Configure GitHub App".
+6. Definir dentro del código la validación del puerto al que se conectará la API:
+      const port = process.env.PORT || 3000;
+7. Tanto si se hace por medio de Heroku (de paga), como por medio de Railway, es necesario
+   crear un archivo llamado "Procfile" (sin extensión). Este archivo permite definir cómo se desea que Heroku o Railway lean el proyecto y cómo
+   se desea que sea lanzado. En este caso, se desea que el proyecto sea leído como un proyecto de tipo "web" y
+   se especifica además el comando que servirá para inicializar el proyecto. En este caso, se utilizó el comando: "npm run start".
+      Ejemplo de archivo Procfile:
+          web: npm run start
+
+
+
+
+
