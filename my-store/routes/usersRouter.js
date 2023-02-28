@@ -10,6 +10,7 @@ import {
 
 const router = express.Router();
 const service = new UserService();
+
 router.get('/', async (req, res, next) => {
   try {
     /*Se espera (await) la ejecución del servicio "find()", el cual se encuentra dentro del archivo "user.service.js", que a su vez se ubica  dentro de la carpeta "services".
@@ -22,6 +23,7 @@ router.get('/', async (req, res, next) => {
     next(error);
   }
 });
+
 router.get(
   '/:id',
   validatorHandler(getUserSchema, 'params'),

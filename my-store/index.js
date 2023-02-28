@@ -1,11 +1,13 @@
 /*
-IMPORTANTE: para probar esta API es necesario tomar en cuenta los siguientes comandos:
+IMPORTANTE: para probar esta API es necesario tomar en cuenta los siguientes comandos (estos comandos son para inicializarla sin DOCKER):
 
 EJECUTAR NODEMON:
   Para probar la aplicación en el entorno de Desarrollo, se utiliza NODEMON para que dicha aplicación detecte
   cualquier cambio en tiempo real, y lo actualice en el navegador.
 
       npm run dev
+
+      ¡¡¡¡¡IMPORTANTE!!!!! El comando "npm run dev" es equivalente (porque así se configuró en el archivo "package.json") al comando "node index.js". POr lo que si aparece algún error similar a este: "el puerto 3000 se encuentra ocupado", es causado porque probablemente se ejecutó antes el comando "npm run dev", y luego se quiere ejecutar el comando "node index.js" directamente, o viceversa. TOMARLO EN CUENTA.
 
   Este comando entonces, ejecuta nodemon y va a escuchar a todos los archivos JavaScript y actualizar la aplicación en tiempo real, al detectar
   algún cambio en ella.
@@ -185,6 +187,30 @@ Express NO ES una dependencia de desarrollo (devDependencies), sino una dependen
 
 */
 
+/*
+**********  Enviar peticiones a la API mediante POSTMAN (FORMA PARA INICIAR LA APLICACIÓN CON DOCKER) **********
+
+
+Para probar el envío de una petición GET a la API, se deben seguir los siguientes pasos:
+
+1. Abrir Docker en la computadora.
+
+2. Como siempre, inicializar el contenedor de Docker. En este ejemplo, dicho contenedor tiene asignado el nombre postgres, por medio del siguiente comando:
+
+  docker-compose up -d nombreContenedor
+
+
+    Ejemplo:
+
+      docker-compose up -d postgres
+
+
+3. En la misma consola, ejecutar el comando `node index.js`. El cual permitirá iniciar Node JS en la aplicación actual.
+4. Acceder a POSTMAN, crear una nueva petición (request) de tipo GET y agregar, por ejemplo, el endpoint: http://localhost:3000/api/v1/users
+5. Al realizar el envío de la petición, se obtendrán los datos de la tabla que corresponda (si los hubiera). En este caso, se consultó la tabla "tasks" de la base de datos "my_store".
+
+*/
+
 /* Se importa "Express JS" */
 import express from 'express';
 
@@ -340,7 +366,7 @@ app.listen(port, () => {
   /* IMPORTANTE: los "console.log" aparcen subrayados porque NO ES UNA BUENA PRÁCTICA dejaron allí cuando
     el archivo es enviado a Producción. Pueden estar para pruebas solamente en la etapa de Desarrollo, pero
     en la etapa de Producción deben ser eliminados. */
-  console.log('Mi port ' + port);
+  /*console.log('Mi port ' + port); */
 });
 
 routerApi(app);

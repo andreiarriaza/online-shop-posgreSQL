@@ -1,0 +1,174 @@
+/*
+Este archivo se encarga de crear la conexión usando Sequelize y ejecutar
+los modelos creados.
+*/
+
+/*
+
+1. Instalar _**Sequelize**_ con el siguiente comando: `npm install --save sequelize`
+2. Instalar los _drivers_ que se necesitan en función del lenguaje de Backend con el que se desea trabajar. Las opciones disponibles son las siguientes:
+
+
+npm install --save pg pg-hstore # Postgres
+npm install --save mysql2
+npm install --save mariadb
+npm install --save sqlite3
+npm install --save tedious # Microsoft SQL Server
+npm install --save oracledb # Oracle Database
+
+
+En este caso, como se está trabajando con _**PostgreSQL**_ se ejecutará el siguiente comando: `npm install --save pg-hstore`
+
+**IMPORTANTE:** en el comando anterior no se incluyó el comando _**pg**_ (es el comando que instala _**node-postgres**_) que sí aparece en el comando original, debido a que dicho comando ya fue utilizado anteriormente cuando se realizó la instalación de _**node-postgres**_.
+
+3. Dentro de la carpeta _**libs**_ se crea un nuevo archivo llamado: _**sequelize.js**_.
+4. Ahora es necesario conectarse a la base de datos agregando el siguiente código:
+
+
+import { Sequelize } from "sequelize";
+
+/* **************** Para obtener la URI de conexión, se usó parte del código del archivo
+ "postgres-pool.js". **************** */
+
+/* Se importa el archivo "config.js", el cual contiene las variables de entorno que,
+por seguridad, fueron creadas en él. */
+// import config from "../config/config.js";
+
+/* Es sugerido proteger las variables de entorno que sean delicadas, codificándolas. Esto se logra mandando un URL con todo el esquema de conexión por medio del método "encodeURIComponent()"
+
+La función encodeURIComponent() en javascript codifica un componente de un componente URI (Identificador uniforme de recursos) reemplazando cada copia de un carácter determinado con una o más secuencias de escape que representan la codificación UTF-8 del carácter en cuestión.
+
+URI significa Identificador de Recurso Uniforme (Uniform Resourse Identifier).
+
+Cualquier cosa que excepcionalmente identifique un recurso es su URI como id, nombre, o número ISBN.
+
+*/
+
+/* ***** Las variables de entorno "dbUser" y "dbPassword" se consideran delicadas, por lo tanto serán codificadas o protegidas. ***** */
+
+/* Se codifica la variable de entorno "dbUser". */
+// const USER = encodeURIComponent(config.dbUser);
+/* Se codifica la variable de entorno "dbPassword". */
+// const PASSWORD = encodeURIComponent(config.dbPassword);
+
+/* Se comenzará a obtener la URL completa de conexión. */
+
+/* Cuando se desea conectar la aplicación a una base de datos remota, por ejemplo en Amazon, Heroku, Digital Ocean, etc., no proporcionan los datos: host, port, user, password, database de forma directa, sino que proporcionan una URL de Conexión.
+
+En este ejemplo, a continuación se conformará una URL de Conexión.
+*/
+
+/* La constante "URI" almacenará la "URL de Conexión". */
+
+/* ************ URL de Conexión ************ */
+/* La URL de Conexión tiene las siguientes partes:
+      - postgres://  Es el protocolo con el que se conectará a PostgresSQL
+      - USER: es el usuario que se codificó anteriormente.
+      - PASSWORD: el password que se configuró anteriormente.
+      - dbHost: la variable de entorno "dbHost" que fue creada en el archivo "config.js".
+      - dbPort: la variable de entorno "dbPort" que fue creada en el archivo "config.js".
+      - dbName: la variable de entorno "dbName" que fue creada en el archivo "config.js".
+*/
+// const URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+
+/* **************** FIN Para obtener la URI de conexión, se usó parte del código del archivo
+ "postgres-pool.js". **************** */
+
+/* Se crea una instancia de la clase "Sequelize".
+
+Al crear la instancia se le envían los siguientes parámetros:
+  - URL de conexión: en este caso, la URL de conexión se encuentra almacenada en la constante URI.
+  - dialect: el lenguaje utilizado por la base de datos de PostgreSQL. "
+  - logging: el valor "console.log" sirve para que cada vez que se ejecute una consulta por medio de Sequelize ORM, se muestre en consola cuál sería el comando SQL equivalente.
+,
+
+*/
+/*
+const sequelize = new Sequelize(URI, {
+  dialect: postgres,
+  logging: console.log,
+});
+
+export default sequelize;
+*/
+
+import { Sequelize } from 'sequelize';
+
+/* **************** Para obtener la URI de conexión, se usó parte del código del archivo
+ "postgres-pool.js". **************** */
+
+/* Se importa el archivo "config.js", el cual contiene las variables de entorno que,
+por seguridad, fueron creadas en él. */
+import config from '../config/config.js';
+
+/* Se importa el archivo "db/models/index.js" dentro del cual fueron configurados los modelos. */
+import setupModels from '../db/models/index.js';
+
+/* Es sugerido proteger las variables de entorno que sean delicadas, codificándolas. Esto se logra mandando un URL con todo el esquema de conexión por medio del método "encodeURIComponent()"
+
+La función encodeURIComponent() en javascript codifica un componente de un componente URI (Identificador uniforme de recursos) reemplazando cada copia de un carácter determinado con una o más secuencias de escape que representan la codificación UTF-8 del carácter en cuestión.
+
+URI significa Identificador de Recurso Uniforme (Uniform Resourse Identifier).
+
+Cualquier cosa que excepcionalmente identifique un recurso es su URI como id, nombre, o número ISBN.
+
+*/
+
+/* ***** Las variables de entorno "dbUser" y "dbPassword" se consideran delicadas, por lo tanto serán codificadas o protegidas. ***** */
+
+/* Se codifica la variable de entorno "dbUser". */
+const USER = encodeURIComponent(config.dbUser);
+/* Se codifica la variable de entorno "dbPassword". */
+const PASSWORD = encodeURIComponent(config.dbPassword);
+
+/* Se comenzará a obtener la URL completa de conexión. */
+
+/* Cuando se desea conectar la aplicación a una base de datos remota, por ejemplo en Amazon, Heroku, Digital Ocean, etc., no proporcionan los datos: host, port, user, password, database de forma directa, sino que proporcionan una URL de Conexión.
+
+En este ejemplo, a continuación se conformará una URL de Conexión.
+*/
+
+/* La constante "URI" almacenará la "URL de Conexión". */
+
+/* ************ URL de Conexión ************ */
+/* La URL de Conexión tiene las siguientes partes:
+      - postgres://  Es el protocolo con el que se conectará a PostgresSQL
+      - USER: es el usuario que se codificó anteriormente.
+      - PASSWORD: el password que se configuró anteriormente.
+      - dbHost: la variable de entorno "dbHost" que fue creada en el archivo "config.js".
+      - dbPort: la variable de entorno "dbPort" que fue creada en el archivo "config.js".
+      - dbName: la variable de entorno "dbName" que fue creada en el archivo "config.js".
+*/
+const URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+
+/* **************** FIN Para obtener la URI de conexión, se usó parte del código del archivo
+ "postgres-pool.js". **************** */
+
+/* Se crea una instancia de la clase "Sequelize".
+
+Al crear la instancia se le envían los siguientes parámetros:
+  - URL de conexión: en este caso, la URL de conexión se encuentra almacenada en la constante URI.
+  - dialect: el lenguaje utilizado por la base de datos de PostgreSQL. "
+  - logging: el valor "true" sirve para que cada vez que se ejecute una consulta por medio de Sequelize ORM, se muestre en consola cuál sería el comando SQL equivalente.
+,
+
+*/
+const sequelize = new Sequelize(URI, {
+  dialect: 'postgres',
+  /* De forma predeterminada, el atributo "logging", tiene asignado el valor "console.log", por eso se dejó comentada esa línea. */
+  /*logging: console.log,*/
+});
+
+/* La función "setupModels()" fue creada en el archivo "db/models/index.js"; y recibe
+como parámetros la conexión que se almacena en la constante "sequelize".
+
+Esta función se encarga de inicializar los modelos correspondientes.
+*/
+setupModels(sequelize);
+/* El método "sync()" se encarga de crear la estructura de la base de datos; es decir, crea las tablas y los campos campos con las características que se definieron dentro de cada modelo.
+
+Por ejemplo, la estructura del modelo "User" fue definida en el archivo "user.model.js".
+*/
+sequelize.sync();
+
+export default sequelize;

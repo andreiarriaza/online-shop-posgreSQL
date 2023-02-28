@@ -43,12 +43,36 @@ Para instalarlo, se debe escribir lo siguiente en consola:
 
 import Boom from '@hapi/boom';
 
+/*
+IMPORTANTE: no es necesario importar el archivo "postgres.pool.js", porque el "pool"
+fue incluido dentro del ORM llamado "Sequelize" (ver la sección "Qué es ORM" del archivo README.md).
+*/
+// import pool from '../libs/postgres.pool.js';
+
+import sequelize from '../libs/sequelize.js';
+
 class ProductsService {
   constructor() {
     // Se inicializa un array en memoria.
     this.products = [];
     /* Se invoca el método "generate" que se crea a continuación. */
     this.generate();
+
+    /*
+IMPORTANTE: no es necesario usar los siguientes comandos "pool", porque este ya fue incluido dentro del ORM llamado "Sequelize" (ver la sección "Qué es ORM" del archivo README.md).
+*/
+
+    /* Se indica que se desea obtener un "pool", el cual corresponde al "pool" que fue importado en la parte superior de este archivo, y que se encuentra en el archivo "postgres.pool.js". */
+
+    //this.pool = pool;
+
+    /* Se va a "escuchar" si hay un error cuando se obtenga el "pool". Si se detecta
+    un error, se ejecutará un callback, que en este caso es una ArrowFunction que indicará que hubo un error en el "pool". */
+    /* IMPORTANTE: los "console.log" aparcen subrayados porque NO ES UNA BUENA PRÁCTICA dejaron allí cuando
+    el archivo es enviado a Producción. Pueden estar para pruebas solamente en la etapa de Desarrollo, pero
+    en la etapa de Producción deben ser eliminados. */
+
+    // this.pool.on('error', (err) => console.error(err));
   }
 
   generate() {
@@ -113,13 +137,42 @@ class ProductsService {
   }
 
   async find() {
-    return new Promise((resolve, reject) => {
-      // Se agrega el método "setTimeout()" para simular la asíncronía.
-      setTimeout(() => {
-        /* Se retorna el contenido del arreglo "products". */
-        resolve(this.products);
-      }, 5000);
-    });
+    const query = 'SELECT * FROM tasks';
+
+    /* Esta línea:
+          const query = 'SELECT * FROM tasks';
+
+    Es equivalente a la siguiente línea creada con el ORM llamado Sequelize:
+
+
+    */
+
+    /*
+
+    La constante "response" almacenará la respuesta de la consulta ejecutada
+    en la base de datos, mediante la instancia "Pool" que se importó del archivo "posgres.pool.js".
+
+    En este caso, la consulta devolverá todos los campos de la tabla "tasks" de la base de datos conectada con la aplicación, la cual, en este caso se llama "my_store".
+
+    Debido a que este procedimiento se debe realizar de forma asíncrona, se agrega el comando "await".
+    */
+    /*
+IMPORTANTE: no es necesario usar el siguiente comando "pool", porque este ya fue incluido dentro del ORM llamado "Sequelize" (ver la sección "Qué es ORM" del archivo README.md).
+*/
+
+    const [data /*, metadata*/] = await sequelize.query(query);
+    /* El ORM llamado Sequelize, devuelve un arreglo con los siguientes elementos:
+      - data: los datos que correspondan a la consulta ejecutada.
+      - metadata: devuelve información más detallada de los datos, por ejemplo: sentencia SQL ejecutada (command), número de filas que conforman la tabla (rowCount), etc.
+
+    En este caso, solamente se usará el elemento que contiene la "data".
+    Si se quisiera también la "metadata", el comanto anterior se debería escribir así:
+          const [data, metadata] = await sequelize.query(query);
+    */
+    return {
+      data,
+      // metadata,
+    };
   }
 
   /* Petición asíncrona para buscar un producto determinado a partir de su "id". */

@@ -354,7 +354,7 @@ Una vez seleccionada la base de datos deseada, se debe dar clic en el botón _**
 
 1. Para acceder a la herramienta _**Query tool**_, la cual permite agregar código SQL para ejecutar consultas en _**pgAdmin**_, se debe seleccionar en el panel _**Browser**_ que se encuentra a la izquierda de la ventana de _**pgAdmin**_, la base de datos en la que se quiere realizar las consultas SQL.
 
-En este ejemplo, al dar clic dentro del panel _**Browser**_ en la carpeta **Servers**, se debe seleccionar el nombre del servidor deseado que, en este caso, sellama _**MyStore**_. A continuación, se debe elegir el nombre de la base de datos que corresponda, la cual en este ejemplo se llama _**my_store**_.
+En este ejemplo, al dar clic dentro del panel _**Browser**_ en la carpeta **Servers**, se debe seleccionar el nombre del servidor al que se desea conectarse, el cual, en este caso, se llama _**MyStore**_. A continuación, se debe dar clic en la opción _**Databases**_ y luego elegir el nombre de la base de datos que corresponda, la cual en este ejemplo se llama _**my_store**_.
 
 Una vez seleccionada la base de datos deseada, se debe dar clic en el botón _**Query tool**_ que se encuentra en la parte superior derecha del panel _**Browser**_:
 ![Query Tools](database_icon_pgadmin.png)
@@ -439,7 +439,7 @@ psql -h localhost -d my_store -U walter
 Para realizar
 Para realizar la integración de Node JS con PostgreSQL se utilizará la librería _**node-postgres**_ cuyo sitio oficial es: https://node-postgres.com/
 
-Esta librería es una colección de módulos que corren con Node JS, los cuales permiten usar promesas y callbacks de forma asíncrona.
+Esta librería es una colección de módulos que corren con Node JS, los cuales permiten usar promesas y callbacks de forma asíncrona. De forma resumida, es un Controlador de PostgreSQL para Node JS.
 
 Para realizar la isntalación de _**node-postgres**_ es necesario seguir los siguientes pasos:
 
@@ -495,7 +495,9 @@ export default getConnection;
 
 Para probar el envío de una petición GET a la API, se deben seguir los siguientes pasos:
 
-1. Como siempre, inicializar el contenedor de _**Docker**_. En este ejemplo, dicho contenedor tiene asignado el nombre _**postgres**_, por medio del siguiente comando:
+1. Abrir Docker en la computadora.
+
+2. Como siempre, inicializar el contenedor de _**Docker**_. En este ejemplo, dicho contenedor tiene asignado el nombre _**postgres**_. También es necesario inicializar el contenedor _**Docker**_ que tiene asignado el nombre _**pgadmin**_. Esto se consigue mediante los siguientes comandos:
 
 ```bash
 docker-compose up -d nombreContenedor
@@ -505,8 +507,346 @@ Ejemplo:
 
 ```bash
 docker-compose up -d postgres
+docker-compose up -d pgadmin
 ```
 
-2. En la misma consola, ejecutar el comando `node index.js`. El cual permitirá iniciar _**Node JS**_ en la aplicación actual.
-3. Acceder a _**POSTMAN**_, crear una nueva petición (request) de tipo _**GET**_ y agregar el _**endpoint**_: http://localhost:3000/api/v1/users
-4. Al realizar el envío de la petición, se obtendrán los datos de la tabla que corresponda (si los hubiera). En este caso, se consultó la tabla "tasks" de la base de datos "my_store".
+3. En la misma consola, ejecutar el comando `node index.js`. El cual permitirá iniciar _**Node JS**_ en la aplicación actual.
+   _**¡¡¡¡¡IMPORTANTE!!!!!:**_ El comando "npm run dev" es equivalente (porque así se configuró en el archivo "package.json") al comando "node index.js". POr lo que si aparece algún error similar a este: "el puerto 3000 se encuentra ocupado", es causado porque probablemente se ejecutó antes el comando "npm run dev", y luego se quiere ejecutar el comando "node index.js" directamente, o viceversa. TOMARLO EN CUENTA.
+4. Acceder a _**POSTMAN**_, crear una nueva petición (request) de tipo _**GET**_ y agregar, por ejemplo, el _**endpoint**_: http://localhost:3000/api/v1/users
+5. Al realizar el envío de la petición, se obtendrán los datos de la tabla que corresponda (si los hubiera). En este caso, se consultó la tabla "tasks" de la base de datos "my_store".
+
+## Pool de conexiones
+
+Un pool de conexiones es un conjunto limitado de conexiones a una base de datos, que es manejado por un servidor de aplicaciones de forma tal, que dichas conexiones pueden ser reutilizadas por los diferentes usuarios.
+
+Ejemplo:
+
+![Ejemplo de Pool de Aplicaciones](Pool.png)
+
+Cada vez que se invoca, por ejemplo, la función asíncrona _**getConnection()**_, ubicada en el archivo _**postgres.js**_, se está generando una conexión nueva con la base de datos. Lo que significa que cada vez que se invoque dicha función se están creando nuevas conexiones que terminarán consumiendo recursos. Para corregir esto, _**pgAdmin**_ tiene una interfaz de _**Pooling**_ la cual permite manejar varias conexiones, pero reutilizando a través de toda la aplicación la misma conexión.
+pgAdmin
+
+## Usar Pool por medio de "node-postgres"
+
+Si está trabajando en una aplicación web u otro software que realiza consultas frecuentes, querrá usar un grupo de conexiones.
+
+La forma más fácil y, con mucho, la más común de usar node-postgres es a través de un grupo de conexiones.
+
+La conexión de un nuevo cliente al servidor PostgreSQL requiere un apretón de manos que puede tardar entre 20 y 30 milisegundos. Durante este tiempo, se negocian las contraseñas, se puede establecer SSL y la información de configuración se comparte con el cliente y el servidor. Incurrir en este costo cada vez que queremos ejecutar una consulta ralentizaría sustancialmente nuestra aplicación.
+
+Al acceder al sitio web de _**node_postgres**_, se puede visualizar, del lado izquierdo, un panel con los diferentes _**features**_ o funcionalidades que tiene disponibles esta librería. En este caso, se usará la funcionalidad de _**Pooling**_, la cual se encuentra explicada en la siguiente _**URL**_: https://node-postgres.com/features/pooling
+
+Para implementar el _**Pooling**_ en esta aplicación, se deben seguir los siguientes pasos:
+
+1. Crear el archivo _**postgres.pool.js**_.
+2. Agregar dentro del archivo anterior, un código como el siguiente:
+
+```js
+/* Se importa el módulo "pkg" de la librería "pg" (node-postgres). Luego, se desestructura a partir de ella la constante "Pool". */
+import pkg from "pg";
+
+const { Pool } = pkg;
+
+/*
+Para realizar la conexión con la base de datos, se crea una instancia
+de la clase "Pool()".
+*/
+const pool = new Pool({
+  /* Se define la configuración de la conexión.
+    - host: se indica el nombre del servidor en el que se encuentra la base
+            de datos. En este caso, como todo se está trabajando con Docker, se le asigna el valor: "localhost".
+
+    - port: sirve para indicar en qué puerto está corriendo la base de datos.
+            En este caso, es en el puerto "5432", el cual es el mismo que se definió en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
+    - user: nombre del usuario de la base de datos. Nuevamente, es el mismo
+            usuario que se definió en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
+
+    - password: password asociado a la base de datos.
+                Nuevamente, es el mismo password que se definió en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
+    - database: nombre de la base de datos. Es el mismo nombre que se definió
+                en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
+
+  */
+  host: "localhost",
+  port: 5432,
+  user: "walter",
+  password: "123",
+  database: "my_store",
+});
+
+/* Se exporta la instancia "pool". */
+export default pool;
+```
+
+En este caso, se agregaron los datos antes indicados para conectarse con la base de datos, pero estos deben reemplazarse por los datos que correspondan a la base de datos con la que se quiera establecer el _**Pool**_.
+
+3. Luego, importarlo e implementarlo en el lugar desedado. En este caso, se recomienda ver cómo se implemento este _**Pool**_ en el archivo _**productService.js**_; y específicamente cuando se declaró la función asíncrona _**find()**_.
+
+## Crear variables de entorno (ambiente) en Node JS
+
+Al inicio de la construcción de este proyecto, se utilizaron variables como el usuario, la contraseña, etc., para poder acceder a la base de datos, se han escrito dentro del código, lo cual es una mala práctica. Lo recomendable es manejar esos datos por medio de variables de entorno en Node JS.
+
+Las variables de entorno se utilizan para almacenar contenido sensible
+
+Para crear variables de entorno se deben seguir los siguientes pasos:
+
+1. Crear carpeta llamada _**config**_.
+2. Dentro de ella se crea el archivo _**config.js**_.
+3. Dentro del archivo anterior agregar el siguiente código:
+
+```js
+/* Este archivo sirve para configurar las variables de entorno que se
+utilizarán en este proyecto. */
+const config = {
+  /*
+
+  env: el atributo "env" sirve para indicar en qué entorno nos encontramos.
+    - process.env: es el comando utilizado por Node JS para leer variables de entorno.
+    - NODE_ENV: es una variable de entorno de Node que indica en qué entorno está el
+                usuario.
+
+                Se agregó un operador de cortocircuito para comprobar si se detecta el entorno en el que está el usuario; si lo detecta, ese entorno se asignará al atributo "env", pero, si no lo detecta, se asignará de forma predeterminada el entorno 'dev' (desarrollador).
+
+  port: el atributo "port" permite definir el puerto en el que se va a ejecutar la
+        aplicación.
+        PORT: es una variable de entorno de Node que devuelve el puerto en el que se está corriendo una aplicación.
+  */
+  /*
+  Cortocircuito OR(||):
+    Cuando el valor de la izquierda en la expresión
+    sea igual a "true", dicho valor de la izquierda será el
+    valor que se agregará, de lo contrario, si el valor de la
+    izquierda es igual a "false" el valor que
+    se agregará será el de la derecha.
+  */
+  env: process.env.NODE_ENV || "dev",
+  /* Si no se detecta un puerto, se asignará de forma predeterminada el puerto "3000". */
+  port: process.env.NODE_PORT || 3000,
+
+  /* ************* Configuración de base de datos ************* */
+  /*
+  dbUser: el atributo "dbUser" permite definir el usuario de la base datos.
+        DB_USER: es una variable de entorno de Node que devuelve el usuario de la base de datos.
+  */
+  dbUser: process.env.DB_USER,
+  /* Clave de la base de datos. */
+  dbPassword: process.env.DB_PASSWORD,
+  /* Nombre del "host" con el que se conectará la base de datos. */
+  dbHost: process.env.DB_HOST,
+  /* Nombre de la base de datos. */
+  dbName: process.env.DB_NAME,
+  /* Puerto por medio del cual se conectará la base de datos. */
+  dbPort: process.env.DB_PORT,
+};
+
+export default config;
+```
+
+4. Acceder al archivo _**postgres.pool.js**_ e importar el archivo _**config.js**_. Luego, se recomienda ver el ardchivo _**postgres.pool.js**_ y ver cómo se implementaron las variables de entorno.
+5. Las variables de entorno se pueden definir directamente desde el archivo _**package.json**_, sin embargo, se recomienda utilizar archivos de variables para definirlas, lo cual se explican en los pasos a continuación.
+
+6. Se debe crear otro archivo llamado _**.env.example**_.
+   Este archivo servirá unicamente para indicar un ejemplo de las variables de entorno que debe aceptar la aplicación. Esto solo sirve de guía para identificar el nombre de las variables de entorno que serán definidas, por si en algún momento alguien más desea continuar nuestro trabajo, ellos sabrán por medio de este archivo cuáles son las variables de entorno necesarias para su funcionamiento. Este archivo NO ES ignorado por _**GitHub**_ pues la idea es que sirva de guía para el desarrollador.
+
+En este archivo, es necesario agregar el siguiente código:
+
+```js
+PORT = 3000;
+DB_USER = "";
+DB_PASSWORD = "";
+DB_HOST = "";
+DB_NAME = "";
+DB_PORT = "";
+```
+
+7. Crear un archivo _**.env**_.
+   Este archivo es ignorado automáticamente por _**GitHub**_  
+   para que no se suba al repositorio por seguridad.
+
+8. Agregar en el archivo _**.env**_ los datos de conexión reales:
+
+```js
+PORT = 3000;
+DB_USER = "walter";
+DB_PASSWORD = "123";
+DB_HOST = "localhost";
+DB_NAME = "my_store";
+DB_PORT = "5432";
+```
+
+9. Instalar el paquete _**dotenv**_ por medio del comando `npm i dotenv`.
+
+Este paquete es el que se encarga de leer el archivo _**.env**_ que se creó anteriormente. Se debe recordar que las variables de entorno se pueden agregar directamente al archivo
+_**package.json**_, sin embargo, com en esta ocasión se creó el archivo _**.env**_, este paquete permite que dicho archivo sea leído y carga automáticamente cada una de las variables en el
+_**process**_ (process.env: este comando es el que permite leer las variables de entorno de Node) de Node JS.
+
+10. Se abre el archivo _**config.js**_ y se importa el paquete _**dotenv**_ de la siguiente manera: `require('dotenv').config();`
+
+11. Listo.
+
+## Qué es una ORM
+
+Un _**ORM**_, por sus siglas al inglés: _**Object Relational Mappper**_, no es más que una pieza de software que nos permite interactuar con nuestra base de datos sin la necesidad de conocer _**SQL**_ (El lenguaje de consultas). Todo esto utilizando el paradigma de programación orientada a objetos.
+
+Para todos aquellos desarrolladores Backend el reto no es solo procesar y aplicar reglas de negocio a la información obtenida, sino obtener la información misma.
+
+Esto puede llegar a ser algo complicado en equipos de desarrollo pequeños, donde, muy probablemente, no exista algún administrador de base de datos que nos facilite la creación de nuestra base de datos o la creación de sentencias SQL para nuestras consultas. Por lo tanto queda del desarrollador mismo a prender, no sólo el lenguaje utilizado Backend, si no además, SQL.
+
+Aprender SQL no está para nada mal, y de hecho lo recomiendo ampliamente, pero para todas aquellas personas que están comenzando en el mundo de la programación, o simplemente quieren agilizar el proceso de desarrollo y no quieren complicarse tanto aprendiendo una nueva tecnología, les tengo una muy buena noticia. Nos podemos apoyar de los ORMs.
+
+Tal y como mencionamos anteriormente, un ORM nos permitirá interactuar con nuestra base de datos sin la necesidad de conocer SQL. Todo mediante programación orientada a objetos.
+
+Actualmente en el mercado existen diferentes ORMs tanto para lenguajes de programación como para frameworks mismos, Los más populares en el entorno de Node JS, son:
+
+- [Sequelize](https://sequelize.org/) - Se integra muy bien en JavaScript.
+- [TypeORM](https://typeorm.io/) - Se integra muy bien en TypeScript.
+
+Los _**ORMs**_ se encarga de traducir nuestra instrucción en el lenguaje de programación que estemos utilizando a una sentencia SQL que el gestor de base de datos pueda entender.
+
+Veamos un ejemplo.
+
+Que pasa si deseamos obtener el id, username, email para nuestro usuarios con id número 110.
+
+Utilizando una base de datos relacional, MySQL por ejemplo. Nuestra consulta quedaría de la siguiente manera:
+
+```sql
+SELECT id, username, email FROM id = 101;
+```
+
+Una sentencia bastante sencilla, Ahora, Utilizando el active record de ruby on rails, la consulta pudierá quedar de la siguiente manera.
+
+```ruby
+User.where(id:101).select(:id, :username, :email)
+```
+
+Cómo puedes observar, ahora estamos utilizando programación orientada a objetos. Nos apoyamos en una clase, métodos y atributos.
+
+Si utilizamos otro ORM, por ejemplo peewee de Python, la consulta sería diferente, pero obtendremos el mismo resultado
+
+```python
+User.select(User.id, User.username, User.email).where(User.id == 101)
+```
+
+Por supuesto, los ORM no solo están diseñados para obtener información, también podemos crear, actualizar, eliminar y procesar registros, tablas o base de datos.
+
+Aquí un ejemplo de como crear un registro con el Active record.
+
+```
+User.create(username:'eduardogpg', email:'eduardocodigofacilito.com')
+```
+
+Esto se traduce a:
+
+```sql
+INSERT INTO "users" ("username", "email", "created_at", "updated_at") VALUES ($1, $2, $3, $4) RETURNING "id" [["username", "eduardogpg"], ["email", "eduardo@codigofacilito.com"], ["created_at", "2021-01-19 19:13:13.622475"], ["updated_at", "2021-01-19 19:13:13.622475"]]
+```
+
+Cada ORM es bastante legible para el lenguaje para el que fue diseñado. Y esto nos lleva a que hablemos de las ventajas de utilizar un ORM.
+
+### Ventajas
+
+- La primera ventaja en esta lista, y quizás la más importante, es que al utilizar un ORM, como estos se encuentran diseñados para un lenguaje en particular, no debemos preocuparnos tanto por conocer y dominar SQL. Lo cual nos permite enfocarnos al cien por ciento en el lenguaje que estemos utilizando del lado del backend. Java, PHP, Python, etc ...
+
+- Otra ventaja es que, la mayoría de los ORMs nos permiten interactuar con diferentes gestores de base de datos, pudiendo así, en dado caso lo llegáramos a necesitar, cambiar de un gestor a otro sin muchos problemas.Por ejemplo, imaginemos que nos encontramos en un proyecto donde actualmente estamos utilizando Oracle como gestor de base de datos, pero por temas administrativos debemos migrar a MySQL. Si utilizamos un ORM el cambio no debería ser gran problema, sería cuestión de modificar la configuración, quizás instalar Drives y listo. Nuevo gestor, y la aplicación sigue funcionando.
+
+- Otra ventaja es que, dependiendo del ORM, podemos llegar a utilizar transacciones, migraciones, triggers e inclusive la posibilidad de trabajar con vistas o store procedures, conceptos un poco más avanzados en el mundo de base de datos. Todo esto, reitero, sin la necesidad de conocer el lenguaje de consultas.
+
+### Desventajas
+
+Ya hablamos de las ventajas, toca el turno de hablar sobre las desventajas de utilizar ORMs, por que sí, también las hay.
+
+- Para consultas complejas, que involucran múltiples tablas, condiciones e inclusive operaciones, es posible que el ORM no llegue a generar las sentencias más óptimas para el gestor, o inclusive se torne aún más complejo crear la consulta utilizando objetos que utilizando el mismo SQL. En esos casos deberíamos optar por obtener la información directamente de la base de datos y posteriormente generar los objetos a partir de ella. Vaya, un doble trabajo.
+
+- Dependiendo del ORM, es posible que las configuraciones sean un poco tediosas. Teniendo que importar, instalar, actualizar, generar nuevos archivos etc...
+
+- Y ahora, quizás la mayor desventaja de todas. Si no tenemos ningún tipo de conocimientos con SQL y dependemos completamente de un ORM, muy probablemente no lleguemos a comprender al cien por ciento las sentencias que estamos creando y ejecutando. Que si bien esto a corto plazo nos permitirá agilizar el proceso de desarrollo, a la larga puede no sonar a una muy buena idea; ya que carecemos de los conocimientos necesarios en el área de base de datos, y al tratar de crear nuestras propias consultas directamente en algún gestor, puede que se nos sea complicado o, inclusive, imposible.
+
+## Pasos para instalar _Sequelize_ (ORM)
+
+La librería _**Sequelize**_ utiliza programación orientada a objetos (POO) para obtener resultados de consultas en tablas, sin utilizar sentencias SQL.
+
+1. Instalar _**Sequelize**_ con el siguiente comando: `npm install --save sequelize`
+2. Instalar los _drivers_ que se necesitan en función del lenguaje de Backend con el que se desea trabajar. Las opciones disponibles son las siguientes:
+
+```bash
+npm install --save pg pg-hstore # Postgres
+npm install --save mysql2
+npm install --save mariadb
+npm install --save sqlite3
+npm install --save tedious # Microsoft SQL Server
+npm install --save oracledb # Oracle Database
+```
+
+En este caso, como se está trabajando con _**PostgreSQL**_ se ejecutará el siguiente comando: `npm install --save pg-hstore`
+
+**IMPORTANTE:** en el comando anterior no se incluyó el comando _**pg**_ (es el comando que instala _**node-postgres**_) que sí aparece en el comando original, debido a que dicho comando ya fue utilizado anteriormente cuando se realizó la instalación de _**node-postgres**_.
+
+3. Dentro de la carpeta _**libs**_ se crea un nuevo archivo llamado: _**sequelize.js**_.
+4. Ahora es necesario conectarse a la base de datos agregando el siguiente código:
+
+```js
+import { Sequelize } from "sequelize";
+
+/* **************** Para obtener la URI de conexión, se usó parte del código del archivo
+ "postgres-pool.js". **************** */
+
+/* Se importa el archivo "config.js", el cual contiene las variables de entorno que,
+por seguridad, fueron creadas en él. */
+import config from "../config/config.js";
+
+/* Es sugerido proteger las variables de entorno que sean delicadas, codificándolas. Esto se logra mandando un URL con todo el esquema de conexión por medio del método "encodeURIComponent()"
+
+La función encodeURIComponent() en javascript codifica un componente de un componente URI (Identificador uniforme de recursos) reemplazando cada copia de un carácter determinado con una o más secuencias de escape que representan la codificación UTF-8 del carácter en cuestión.
+
+URI significa Identificador de Recurso Uniforme (Uniform Resourse Identifier).
+
+Cualquier cosa que excepcionalmente identifique un recurso es su URI como id, nombre, o número ISBN.
+
+*/
+
+/* ***** Las variables de entorno "dbUser" y "dbPassword" se consideran delicadas, por lo tanto serán codificadas o protegidas. ***** */
+
+/* Se codifica la variable de entorno "dbUser". */
+const USER = encodeURIComponent(config.dbUser);
+/* Se codifica la variable de entorno "dbPassword". */
+const PASSWORD = encodeURIComponent(config.dbPassword);
+
+/* Se comenzará a obtener la URL completa de conexión. */
+
+/* Cuando se desea conectar la aplicación a una base de datos remota, por ejemplo en Amazon, Heroku, Digital Ocean, etc., no proporcionan los datos: host, port, user, password, database de forma directa, sino que proporcionan una URL de Conexión.
+
+En este ejemplo, a continuación se conformará una URL de Conexión.
+*/
+
+/* La constante "URI" almacenará la "URL de Conexión". */
+
+/* ************ URL de Conexión ************ */
+/* La URL de Conexión tiene las siguientes partes:
+      - postgres://  Es el protocolo con el que se conectará a PostgresSQL
+      - USER: es el usuario que se codificó anteriormente.
+      - PASSWORD: el password que se configuró anteriormente.
+      - dbHost: la variable de entorno "dbHost" que fue creada en el archivo "config.js".
+      - dbPort: la variable de entorno "dbPort" que fue creada en el archivo "config.js".
+      - dbName: la variable de entorno "dbName" que fue creada en el archivo "config.js".
+*/
+const URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+
+/* **************** FIN Para obtener la URI de conexión, se usó parte del código del archivo
+ "postgres-pool.js". **************** */
+
+/* Se crea una instancia de la clase "Sequelize". 
+
+Al crear la instancia se le envían los siguientes parámetros: 
+  - URL de conexión: en este caso, la URL de conexión se encuentra almacenada en la constante URI. 
+  - dialect: el lenguaje utilizado por la base de datos de PostgreSQL. "
+  - logging: el valor "console.log" sirve para que cada vez que se ejecute una consulta por medio de Sequelize ORM, se muestre en consola cuál sería el comando SQL equivalente. 
+,
+
+*/
+const sequelize = new Sequelize(URI, {
+  dialect: postgres,
+  logging: console.log,
+});
+
+export default sequelize;
+```
