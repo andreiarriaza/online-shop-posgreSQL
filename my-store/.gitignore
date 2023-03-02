@@ -28,5 +28,8 @@ yarn-error.log*
 
 /.parcel-cache
 
-
+# Estas carpetas almacenan los datos de los contenedores "mysql" y "postgres".
+# Como no se desea subir al repositorio esta información,
+# se agregan acá para que sean ignoradas por GitHub.
 potgres_data
+mysql_data

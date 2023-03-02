@@ -39,6 +39,11 @@ router.get(
 );
 router.post(
   '/',
+  /* La función "validatorHandler" tiene dos parámetros:
+     - En el primer parámetro se invoca la función "createUserSchema", la cual se
+       encargará de ejecutar la validación de los datos, la cual fue creada en el archivo "user.schema.js".
+     - El segundo parámetro sirve para definir el nombre con el que los datos devueltos
+       por la función "createUserSchema", serán identificados.   */
   validatorHandler(createUserSchema, 'body'),
   async (req, res, next) => {
     try {

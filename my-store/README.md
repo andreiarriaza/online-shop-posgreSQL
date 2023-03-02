@@ -497,18 +497,30 @@ Para probar el envío de una petición GET a la API, se deben seguir los siguien
 
 1. Abrir Docker en la computadora.
 
-2. Como siempre, inicializar el contenedor de _**Docker**_. En este ejemplo, dicho contenedor tiene asignado el nombre _**postgres**_. También es necesario inicializar el contenedor _**Docker**_ que tiene asignado el nombre _**pgadmin**_. Esto se consigue mediante los siguientes comandos:
+2. Como siempre, inicializar el contenedor de _**Docker**_. Como en este proyecto, para comprobar la versatilidad de _**Docker**_ se instalaron dos diferentes Sistemas de Gestión de Bases de Datos en sus respectivos contenedores, se tienen dos opciones:
 
-```bash
-docker-compose up -d nombreContenedor
-```
+- Primera opción: es necesario inicializar el contenedor _**Docker**_ que tiene asignado el nombre _**postgres**_ (Sistema de Gestión de Base de Datos). También es necesario inicializar el contenedor _**Docker**_ que tiene asignado el nombre _**pgadmin**_ (interfaz gráfica). Esto se consigue mediante los siguientes comandos:
 
-Ejemplo:
+  ```bash
+  docker-compose up -d nombreContenedor
 
-```bash
-docker-compose up -d postgres
-docker-compose up -d pgadmin
-```
+  ```
+
+  Ejemplo:
+
+  ```bash
+  docker-compose up -d postgres
+  docker-compose up -d pgadmin
+  ```
+
+- Segunda opción: es necesario inicializar el contenedor _**Docker**_ que tiene asignado el nombre _**mysql**_ (Sistema de Gestión de Base de Datos). También es necesario inicializar el contenedor _**Docker**_ que tiene asignado el nombre _**phpmyadmin**_ (interfaz gráfica). Esto se consigue mediante los siguientes comandos:
+
+  Ejemplo:
+
+  ```bash
+  docker-compose up -d mysql
+  docker-compose up -d phpmyadmin
+  ```
 
 3. En la misma consola, ejecutar el comando `node index.js`. El cual permitirá iniciar _**Node JS**_ en la aplicación actual.
    _**¡¡¡¡¡IMPORTANTE!!!!!:**_ El comando "npm run dev" es equivalente (porque así se configuró en el archivo "package.json") al comando "node index.js". POr lo que si aparece algún error similar a este: "el puerto 3000 se encuentra ocupado", es causado porque probablemente se ejecutó antes el comando "npm run dev", y luego se quiere ejecutar el comando "node index.js" directamente, o viceversa. TOMARLO EN CUENTA.

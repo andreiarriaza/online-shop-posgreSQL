@@ -222,12 +222,13 @@ import routerApi from './routes/index.js';
 
 /* Se importan los Middleware de error que serán utilizados globalmente en la aplicación. */
 /*
-  IMPORTANTE: para que el Middleware funcione, es indispensable implementarlo despupés de la línea: routerApi(app)
+  IMPORTANTE: para que el Middleware funcione, es indispensable implementarlo después de la línea: routerApi(app)
 */
 import {
   logErrors,
   errorHandler,
   boomErrorHandler,
+  ormErrorHandler,
 } from './middlewares/errorHandler.js';
 
 /*
@@ -381,6 +382,7 @@ routerApi(app);
 IMPORTANTE: los Middlewares de tipo error se deben crear después de definir el "Routing", de lo contrario se generará un error.
 */
 app.use(logErrors);
+app.use(ormErrorHandler);
 app.use(boomErrorHandler);
 app.use(errorHandler);
 

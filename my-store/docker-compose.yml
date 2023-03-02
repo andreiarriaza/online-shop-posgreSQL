@@ -7,21 +7,14 @@ services:
   # Acá puede colocarse el nombre de la base de datos,  sin embargo, como buena práctica, se acostumbra colocar el nombre del servicio que se utilizará, en este caso, el servicio se llama: postgre.
   # IMPORTANTE: Este servicio se descargará y ejecutará por medio de Docker.
   postgres:
-    # (opcional) Se le asigna el nombre al contenedor. Puede ser
-    # cualquier nombre, en este caso, se le asignó el mismo nombre del servicio,
-    # pero esto puede cambiar sin ningún problema.
+    # (opcional) Se le asigna el nombre al contenedor. Puede ser cualquier nombre, en este caso, se le asignó el mismo nombre del servicio, pero esto puede cambiar sin ningún problema.
     container_name: postgres
-    # Se define la versión de PostgreSQL que se usará (correrá) en este contenedor.
-    # Si se agrega el comando "latest", se define que se desea trabajar con la versión
-    # más reciente de PostgreSQL. Si se deseara una versión en específico,
-    # se puede escribir directamente el número de versión deseado.
-    image:
-      postgres:latest
+    # Se define la versión de PostgreSQL que se usará (correrá) en este contenedor. Si se agrega el comando "latest", se define que se desea trabajar con la versión más reciente de PostgreSQL. Si se deseara una versión en específico, se puede escribir directamente el número de versión deseado.
 
-      # Se definen las variables de entorno (envirnoment), las cuales son las que permiten indicar la configuración
-      # inicial que se le asignará a la imagen. En las variables de entorno
-      # puede ir, por ejemplo, la siguiente
-      # información: nombre de base de datos, usuario, password, etc.
+    # IMPORTANTE: el atributo "image", sirve para indicar lo que es necesario descargar para el funcionamiento del servicio. En este caso, se necesita "postgres" y se eligió la versión más reciente (latest).
+    image: postgres:latest
+
+    # Se definen las variables de entorno (environment), las cuales son las que permiten indicar la configuración inicial que se le asignará a la imagen. En las variables de entorno puede ir, por ejemplo, la siguiente información: nombre de base de datos, usuario, password, etc.
     environment:
       # El comando "POSTGRES_DB" sirve para definir el nombre de la base de datos deseada.
       - POSTGRES_DB=my_store
@@ -32,38 +25,34 @@ services:
         # Se define la contraseña del usuario respectivo.
       - POSTGRES_PASSWORD=123
 
-        # Se define el puerto en el que se ejecutará PostgresSQL. Normalmente PostgreSQL se ejecuta en el puerto "5432".
+    # Se define el puerto en el que se ejecutará PostgresSQL. Normalmente PostgreSQL se ejecuta en el puerto "5432".
     ports:
-      # Este servicio correrá en el puerto de la computadora "5432".
-      # Internamente, correrá en el puerto "5432" del contenedor.
+      # Este servicio correrá en el puerto de la computadora "5432" (primer valor).
+      # Internamente, correrá en el puerto "5432" del contenedor (segundo valor).
       - 5432:5432
 
     volumes:
-      # Los contenedores NO TIENEN ESTADO. Esto significa que al detener la
-      # ejecución de un contenedor, toda la información se borrará. Esto es
-      # precisamente lo contrario de lo que se busca conseguir usando base de    # datos, pues es indispensable que la información de la base de datos
-      # persista (se almacene) aún después de que el contenedor de Docker se
-      # haya detenido. Para corregir este problema, es necesario agregar el
-      # atributo "volumen" al archivo "docker-compose.yml".
+      # Los contenedores NO TIENEN ESTADO. Esto significa que al detener la ejecución de un contenedor, toda la información se borrará. Esto es precisamente lo contrario de lo que se busca conseguir usando bases de datos, pues es indispensable que la información de la base de datos persista (se almacene) aún después de que el contenedor de Docker se haya detenido. Para corregir este problema, es necesario agregar el atributo "volumen" al archivo "docker-compose.yml".
 
-      # Se define en qué lugar se desea almacenar la información de la base
-      # de datos del contenedor.
-      # Se almacenará en la carpeta "progress_data" del proyecto actual.
-      # La información del contenedor se almacenará internamente en la carpeta:
+      # Se define en qué lugar se desea almacenar la información de la base de datos del contenedor. Se almacenará en la carpeta "progress_data" del proyecto actual.La información del contenedor se almacenará internamente en la carpeta:
       # /var/lib/postgres/data
 
       # Esta ruta es específica para "postgreSQL". La ruta para MariaDB o
       # para MySQL son diferentes.
       - "./postgres_data:/var/lib/postgresql/data"
 
-  # Este servicio permitirá utilizar la interfaz gráfica para trabajar con
-  # PostgreSQL, la cual se llama "pgAdmin".
+  # Este servicio llamdo "pgadmin" permitirá utilizar la interfaz gráfica para trabajar con
+  # PostgreSQL.
   # IMPORTANTE: Este servicio se descargará y ejecutará por medio de Docker.
+
+  # "pgadmin" es un entorno gráfico para PostgreSQL.
   pgadmin:
     # (opcional) Se le asigna el nombre al contenedor. Puede ser
     # cualquier nombre, en este caso, se le asignó el mismo nombre del servicio,
     # pero esto puede cambiar sin ningún problema.
     container_name: pgadmin
+
+    # IMPORTANTE: el atributo "image", sirve para indicar lo que es necesario descargar para el funcionamiento del servicio. En este caso, se necesita "pgadmin" y se eligió la versión "4".
 
     # Para poder usar la imagen de 'pgAdmin' es fundamental hacer lo siguiente:
     # 1. Acceder al sitio web:
@@ -83,7 +72,8 @@ services:
 
     # Si no se desea definir la versión específica,
     # se puede indicar que se desea trabajar con la versión más reciente
-    # utililzando la palabra "latest":
+    # utililzando la palabra "latest".
+
     image:
       dpage/pgadmin4
       # Se definen las variables de entorno (envirnoment), las cuales son las que permiten indicar la configuración
@@ -95,12 +85,79 @@ services:
       # Se define una contraseña asociada al correo electrónico anterior.
       - PGADMIN_DEFAULT_PASSWORD=root
 
+    # Se define en qué puerto se desea que corra el entorno gráfico
     ports:
-      # Este servicio correrá en el puerto de la computadora "5050".
-      # Internamente, correrá en el puerto "80" del contenedor.
+      # Este servicio correrá en el puerto de la computadora "5050" (primer valor).
+      # Internamente, correrá en el puerto "80" del contenedor (Segundo valor).
       - 5050:80
 
       # IMPORTANTE: en este servicio NO es necesario definir un atributo
       # "volumes" (volúmenes), porque este servicio no necesita
       # persistencia de datos. El único servicio que necesita persistencia,
       # es el servicio "postgres", el cual contiene la base de datos.
+
+  # IMPORTANTE: para probar la versatilidad de Docker, también se creará a continuación un contenedor llamado "mysql". Esto significa que Docker da la enorme ventaja de que permite que se cambie de Sistema de Gestión de Base de Datos, sin necesidad de instalar drivers y configuraciones engorrosas en la computadora donde se implemente. En este ejemplo, el usuario podrá elegir si desea utilizar el Sistema de Gestión de Bases de Datos llamado # "MySQL" o bien utilizar el que se llama "PostgreSQL".
+
+  mysql:
+    # (opcional) Se le asigna el nombre al contenedor. Puede ser
+    # cualquier nombre, en este caso, se le asignó el mismo nombre del servicio,
+    # pero esto puede cambiar sin ningún problema.
+    container_name: mysql
+    # IMPORTANTE: el atributo "image", sirve para indicar lo que es necesario descargar para el funcionamiento del servicio. En este caso, se necesita "mysql" y se eligió la versión "5".
+
+    # Se define la versión de PostgreSQL que se usará (correrá) en este contenedor. Si se agrega el comando "latest", se define que se desea trabajar con la versión más reciente de PostgreSQL. Si se deseara una versión en específico, se puede escribir directamente el número de versión deseado.
+    image: mysql:5
+
+    # Se definen las variables de entorno (environment), las cuales son las que permiten indicar la configuración inicial que se le asignará a la imagen. En las variables de entorno puede ir, por ejemplo, la siguiente información: nombre de base de datos, usuario, password, etc.
+
+    environment:
+      # El comando "POSTGRES_DB" sirve para definir el nombre de la base de datos deseada.
+      - MYSQL_DATABASE=my_store
+
+        # Se define el nombre de usuario.
+      - MYSQL_USER=walter
+
+      # Se define la contraseña del usuario respectivo.
+      - MYSQL_ROOT_PASSWORD=123
+
+      # EL Sistema de Gestión de Bases de Datos MySQL exige que se defina también, como variable de entorno, el puerto a través del cual se realizará la comunicación con la base de datos. El puerto en el que generalmente corre MySQL es el "3306".
+      - MYSQL_PORT=3306
+
+      # Se define el puerto en el que se ejecutará MySQL. Normalmente MySQL se ejecuta en el puerto "3306".
+    ports:
+      # Este servicio correrá en el puerto de la computadora "33061" (primer valor).
+      # Internamente, correrá en el puerto "3306" del contenedor (segundo valor).
+      - 33061:3306
+
+    volumes:
+      # Los contenedores NO TIENEN ESTADO. Esto significa que al detener la ejecución de un contenedor, toda la información se borrará. Esto es precisamente lo contrario de lo que se busca conseguir usando bases de datos, pues es indispensable que la información de la base de datos persista (se almacene) aún después de que el contenedor de Docker se haya detenido. Para corregir este problema, es necesario agregar el atributo "volumen" al archivo "docker-compose.yml".
+
+      # Se define en qué lugar se desea almacenar la información de la base de datos del contenedor. Se almacenará en la carpeta "mysql_data" del proyecto actual.La información del contenedor se almacenará internamente en la carpeta:
+      # /var/lib/mysql
+
+      # Esta ruta es específica para "MySQL". La ruta para MariaDB o para PostgreSQL son diferentes.
+      - "./mysql_data:/var/lib/mysql"
+
+  # Este servicio llamdo "pgadmin" permitirá utilizar la interfaz gráfica para trabajar con MySQL. IMPORTANTE: Este servicio se descargará y ejecutará por medio de Docker. "phpmyadmin" es un entorno gráfico para MySQL.
+  phpmyadmin:
+    # (opcional) Se le asigna el nombre al contenedor. Puede ser cualquier nombre, en este caso, se le asignó el mismo nombre del servicio, pero esto puede cambiar sin ningún problema.
+    container_name: phpmyadmin
+
+    # Al definir la imagen, se puede definir la versión específica de "pgadmin", como se muestra en la siguiente línea:
+    # image: dpage/pgadmin4
+
+    # IMPORTANTE: el atributo "image", sirve para indicar lo que es necesario descargar para el funcionamiento del servicio. En este caso, se necesita "phpmyadmin".
+    # Si no se desea definir la versión específica, se puede indicar que se desea trabajar con la versión más reciente utililzando la palabra "latest".
+    image: phpmyadmin/phpmyadmin
+
+    environment:
+      # Se define una contraseña asociada al correo electrónico anterior.
+      - MYSQL_ROOT_PASSWORD=root
+
+      # Indica en qué host está corriendo la base de datos de MySQL. Se define como host, el nombre del servicio con el cual será asociado, en este caso el servicio "mysql".
+      - PMA_HOST=mysql
+    # Se define en qué puerto se desea que corra el entorno gráfico
+    ports:
+      # Este servicio correrá en el puerto de la computadora "8080" (primer valor).
+      # Internamente, correrá en el puerto "80" del contenedor (segundo valor).
+      - 8080:80

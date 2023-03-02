@@ -71,6 +71,10 @@ Además de descomentar la línea anterior, se agregó dentro del archivo "produc
 
 */
 
+/* Se importa el método "ValidationError", el cual pertenece a la librería
+"Sequelize". */
+import { ValidationError } from 'sequelize';
+
 /* PRIMER MIDDLWARE DE ERROR: captura el error y lo envía a consola. */
 
 function logErrors(err, req, res, next) {
@@ -138,4 +142,20 @@ function boomErrorHandler(err, req, res, next) {
   next(err);
 }
 
-export { logErrors, errorHandler, boomErrorHandler };
+/* Este Middleware servirá para capturar los errores devueltos por el ORM llamado "Sequelize". */
+function ormErrorHandler(err, req, res, next) {
+  /* Se verifica si el error es de tipo "ValidationError", es decir,
+  verifica si el error es generado por la librería "Sequelize".*/
+  if (err instanceof ValidationError) {
+    res.status(409).json({
+      statusCode: 409,
+      message: err.name,
+      errors: err.errors,
+    });
+  }
+  /* Si el error generado NO ES de tipo "Sequelize", se invoca la función "next()", la cual ejecuta los Middlewares
+  que se crearon en este archivo (excepto el middleware "ormErrorHnadler()", pues este último es exclusivo para errores de la librería "Sequelize"). */
+  next(err);
+}
+
+export { logErrors, errorHandler, boomErrorHandler, ormErrorHandler };
