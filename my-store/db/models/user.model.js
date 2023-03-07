@@ -4,7 +4,7 @@ Se crea el modelo llamado "User", el cual será utilizado en el archivo "db/mode
 
 /* Se importan las utilidades "Model", "DataTypes" y "Sequelize"
 que forman parte del ORM llamado Sequelize. */
-import { Model, DataTypes, Sequelize } from 'sequelize';
+const { Model, DataTypes, Sequelize } = require('sequelize');
 
 // Definir el nombre de la tabla
 /* Una buena práctica para nombrar los elementos en Sequelize y en general en las bases de datos es, en lugar de utilizar Camel Casing, utilizar el casign llamado "snake case".
@@ -80,4 +80,4 @@ class User extends Model {
   }
 }
 
-export { USER_TABLE, UserSchema, User };
+module.exports = { USER_TABLE, UserSchema, User };

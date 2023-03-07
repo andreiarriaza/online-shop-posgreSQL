@@ -212,24 +212,24 @@ Para probar el envío de una petición GET a la API, se deben seguir los siguien
 */
 
 /* Se importa "Express JS" */
-import express from 'express';
+const express = require('express');
 
 /* Se importa la función "routerApi" que se encuentra dentro del archivo "index.js", el cual se encuentra
 dentro de la carpeta "routes". No hace falta agregar explícitamente el nombre del archivo "index.js" (aunque, en este caso, se agregó
 por decisión propia), debido a que se sobreentiende que con solo agregar el nombre de la carpeta "routes", lo que se quiere importar es
 el archivo "index.js" que contiene. */
-import routerApi from './routes/index.js';
+const routerApi = require('./routes/index.js');
 
 /* Se importan los Middleware de error que serán utilizados globalmente en la aplicación. */
 /*
   IMPORTANTE: para que el Middleware funcione, es indispensable implementarlo después de la línea: routerApi(app)
 */
-import {
+const {
   logErrors,
   errorHandler,
   boomErrorHandler,
   ormErrorHandler,
-} from './middlewares/errorHandler.js';
+} = require('./middlewares/error.handler');
 
 /*
 Por seguridad, cuando se desea acceder a determinado recurso desde un dominio diferente al dominio en el que se encuentr alojado
@@ -257,7 +257,7 @@ Para evitar este problema, se utilizará la librería "CORS", la cual se instala
 
 
 */
-import cors from 'cors';
+const cors = require('cors');
 
 /* Se asigna el método "express()" a la constante "app". */
 const app = express();

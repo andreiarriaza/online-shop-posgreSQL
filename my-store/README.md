@@ -461,10 +461,8 @@ Para realizar la isntalación de _**node-postgres**_ es necesario seguir los sig
    se encuentra la sección _**Geting started**_ , dentro de la cual se encuentra un ejemplo de cómo implementar Node JS con PostgresSQL. Tomando como referencia dicho código, se adecuará a lo que se necesita en esta aplicación, y se agregará dentro del archivo _**postgres.js**_ recién creado:
 
 ```js
-/* Se importa la librería "pkg" de la librería "pg", y se desestructura a partir de ella la constante "Client". */
-import pkg from "pg";
-
-const { Client } = pkg;
+/* Se importa el módulo "pkg" de la librería "pg" (node-postgres). Luego, se desestructura a partir de ella la constante "Client". */
+const { Client } = require("pg");
 
 async function getConnection() {
   /*
@@ -499,7 +497,7 @@ de la clase "Client()".
 }
 
 /* Se exporta la función "getConnection()". */
-export default getConnection;
+module.exports = getConnection;
 ```
 
 ## Abrir pgAdmin y ejecutar consultas
@@ -772,16 +770,55 @@ Para implementar el _**Pooling**_ en esta aplicación, se deben seguir los sigui
 
 ```js
 /* Se importa el módulo "pkg" de la librería "pg" (node-postgres). Luego, se desestructura a partir de ella la constante "Pool". */
-import pkg from "pg";
+const { Pool } = require("pg");
 
-const { Pool } = pkg;
+/* Se importa el archivo "config.js", el cual contiene las variables de entorno que,
+por seguridad, fueron creadas en él. */
+const { config } = require("./../config/config.js");
+
+/* Es sugerido proteger las variables de entorno que sean delicadas, codificándolas. Esto se logra mandando un URL con todo el esquema de conexión por medio del método "encodeURIComponent()"
+
+La función encodeURIComponent() en javascript codifica un componente de un componente URI (Identificador uniforme de recursos) reemplazando cada copia de un carácter determinado con una o más secuencias de escape que representan la codificación UTF-8 del carácter en cuestión.
+
+URI significa Identificador de Recurso Uniforme (Uniform Resourse Identifier).
+
+Cualquier cosa que excepcionalmente identifique un recurso es su URI como id, nombre, o número ISBN.
+
+*/
+
+/* ***** Las variables de entorno "dbUser" y "dbPassword" se consideran delicadas, por lo tanto serán codificadas o protegidas. ***** */
+
+/* Se codifica la variable de entorno "dbUser". */
+const USER = encodeURIComponent(config.dbUser);
+/* Se codifica la variable de entorno "dbPassword". */
+const PASSWORD = encodeURIComponent(config.dbPassword);
+
+/* Se comenzará a obtener la URL completa de conexión. */
+
+/* Cuando se desea conectar la aplicación a una base de datos remota, por ejemplo en Amazon, Heroku, Digital Ocean, etc., no proporcionan los datos: host, port, user, password, database de forma directa, sino que proporcionan una URL de Conexión.
+
+En este ejemplo, a continuación se conformará una URL de Conexión.
+*/
+
+/* La constante "URI" almacenará la "URL de Conexión". */
+
+/* ************ URL de Conexión ************ */
+/* La URL de Conexión tiene las siguientes partes:
+      - postgres://  Es el protocolo con el que se conectará a PostgresSQL
+      - USER: es el usuario que se codificó anteriormente.
+      - PASSWORD: el password que se configuró anteriormente.
+      - dbHost: la variable de entorno "dbHost" que fue creada en el archivo "config.js".
+      - dbPort: la variable de entorno "dbPort" que fue creada en el archivo "config.js".
+      - dbName: la variable de entorno "dbName" que fue creada en el archivo "config.js".
+*/
+const URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
 
 /*
 Para realizar la conexión con la base de datos, se crea una instancia
 de la clase "Pool()".
 */
 const pool = new Pool({
-  /* Se define la configuración de la conexión.
+  /* Se define la configuración de la conexión por medio de la .
     - host: se indica el nombre del servidor en el que se encuentra la base
             de datos. En este caso, como todo se está trabajando con Docker, se le asigna el valor: "localhost".
 
@@ -796,15 +833,15 @@ const pool = new Pool({
                 en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
 
   */
-  host: "localhost",
-  port: 5432,
-  user: "walter",
-  password: "123",
-  database: "my_store",
+
+  /* El atributo "connectionString" es reconocido por el _**Pool**_ de conexiones, y sirve para poder indicar cuál será la URL (cadena) de conexión.
+
+  Luego, se le pasa como valor la constante URI que se declaró justo arriba. */
+  connectionString: URI,
 });
 
 /* Se exporta la instancia "pool". */
-export default pool;
+module.exports = pool;
 ```
 
 En este caso, se agregaron los datos antes indicados para conectarse con la base de datos, pero estos deben reemplazarse por los datos que correspondan a la base de datos con la que se quiera establecer el _**Pool**_.
@@ -824,6 +861,13 @@ Para crear variables de entorno se deben seguir los siguientes pasos:
 3. Dentro del archivo anterior agregar el siguiente código:
 
 ```js
+/* Se importa el paquete "dotenv". */
+
+/* El paquete "dotenv" se encarga de leer el archivo "env" que se creó anteriormente. Se debe recordar que las variables de entorno se pueden agregar directamente al archivo
+"package.json", sin embargo, com en esta ocasión se creó el archivo ".env"  este paquete permite que dicho archivo sea leído y carga automáticamente cada una de las variables en el "process" (process.env: este comando es el que permite leer las variables de entorno de Node) de Node JS. */
+// import the "dotenv" package
+require("dotenv").config();
+
 /* Este archivo sirve para configurar las variables de entorno que se
 utilizarán en este proyecto. */
 const config = {
@@ -868,7 +912,7 @@ const config = {
   dbPort: process.env.DB_PORT,
 };
 
-export default config;
+module.exports = { config };
 ```
 
 4. Acceder al archivo _**postgres.pool.js**_ e importar el archivo _**config.js**_. Luego, se recomienda ver el ardchivo _**postgres.pool.js**_ y ver cómo se implementaron las variables de entorno.
@@ -1026,6 +1070,33 @@ En este caso, como se está trabajando con _**PostgreSQL**_ se ejecutará el sig
 4. Ahora es necesario conectarse a la base de datos agregando el siguiente código:
 
 ```js
+/*
+Este archivo se encarga de crear la conexión usando Sequelize y ejecutar
+los modelos creados.
+*/
+
+/*
+
+1. Instalar _**Sequelize**_ con el siguiente comando: `npm install --save sequelize`
+2. Instalar los _drivers_ que se necesitan en función del lenguaje de Backend con el que se desea trabajar. Las opciones disponibles son las siguientes:
+
+
+npm install --save pg pg-hstore # Postgres
+npm install --save mysql2
+npm install --save mariadb
+npm install --save sqlite3
+npm install --save tedious # Microsoft SQL Server
+npm install --save oracledb # Oracle Database
+
+
+En este caso, como se está trabajando con _**PostgreSQL**_ se ejecutará el siguiente comando: `npm install --save pg-hstore`
+
+**IMPORTANTE:** en el comando anterior no se incluyó el comando _**pg**_ (que se utiliza para instalar _**node-postgres**_), el cual sí aparece en el comando original, debido a que dicho comando ya fue utilizado anteriormente cuando se realizó la instalación de _**node-postgres**_.
+
+3. Dentro de la carpeta _**libs**_ se crea un nuevo archivo llamado: _**sequelize.js**_.
+4. Ahora es necesario conectarse a la base de datos agregando el siguiente código:
+
+
 import { Sequelize } from "sequelize";
 
 /* **************** Para obtener la URI de conexión, se usó parte del código del archivo
@@ -1033,9 +1104,79 @@ import { Sequelize } from "sequelize";
 
 /* Se importa el archivo "config.js", el cual contiene las variables de entorno que,
 por seguridad, fueron creadas en él. */
-import config from "../config/config.js";
+// import config from "../config/config.js";
 
 /* Es sugerido proteger las variables de entorno que sean delicadas, codificándolas. Esto se logra mandando un URL con todo el esquema de conexión por medio del método "encodeURIComponent()"
+
+La función encodeURIComponent() en javascript codifica un componente de un componente URI (Identificador uniforme de recursos) reemplazando cada copia de un carácter determinado con una o más secuencias de escape que representan la codificación UTF-8 del carácter en cuestión.
+
+URI significa Identificador de Recurso Uniforme (Uniform Resourse Identifier).
+
+Cualquier cosa que excepcionalmente identifique un recurso es su URI como id, nombre, o número ISBN.
+
+*/
+
+/* ***** Las variables de entorno "dbUser" y "dbPassword" se consideran delicadas, por lo tanto serán codificadas o protegidas. ***** */
+
+/* Se codifica la variable de entorno "dbUser". */
+// const USER = encodeURIComponent(config.dbUser);
+/* Se codifica la variable de entorno "dbPassword". */
+// const PASSWORD = encodeURIComponent(config.dbPassword);
+
+/* Se comenzará a obtener la URL completa de conexión. */
+
+/* Cuando se desea conectar la aplicación a una base de datos remota, por ejemplo en Amazon, Heroku, Digital Ocean, etc., no proporcionan los datos: host, port, user, password, database de forma directa, sino que proporcionan una URL de Conexión.
+
+En este ejemplo, a continuación se conformará una URL de Conexión.
+*/
+
+/* La constante "URI" almacenará la "URL de Conexión". */
+
+/* ************ URL de Conexión ************ */
+/* La URL de Conexión tiene las siguientes partes:
+      - postgres://  Es el protocolo con el que se conectará a PostgresSQL
+      - USER: es el usuario que se codificó anteriormente.
+      - PASSWORD: el password que se configuró anteriormente.
+      - dbHost: la variable de entorno "dbHost" que fue creada en el archivo "config.js".
+      - dbPort: la variable de entorno "dbPort" que fue creada en el archivo "config.js".
+      - dbName: la variable de entorno "dbName" que fue creada en el archivo "config.js".
+*/
+// const URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+
+/* **************** FIN Para obtener la URI de conexión, se usó parte del código del archivo
+ "postgres-pool.js". **************** */
+
+/* Se crea una instancia de la clase "Sequelize".
+
+Al crear la instancia se le envían los siguientes parámetros:
+  - URL de conexión: en este caso, la URL de conexión se encuentra almacenada en la constante URI.
+  - dialect: el lenguaje utilizado por la base de datos de PostgreSQL. "
+  - logging: el valor "console.log" sirve para que cada vez que se ejecute una consulta por medio de Sequelize ORM, se muestre en consola cuál sería el comando SQL equivalente.
+,
+
+*/
+/*
+const sequelize = new Sequelize(URI, {
+  dialect: postgres,
+  logging: console.log,
+});
+
+export default sequelize;
+*/
+
+const { Sequelize } = require("sequelize");
+
+/* **************** Para obtener la URI de conexión, se usó parte del código del archivo
+ "postgres-pool.js". **************** */
+
+/* Se importa el archivo "config.js", el cual contiene las variables de entorno que,
+por seguridad, fueron creadas en él. */
+const { config } = require("./../config/config.js");
+
+/* Se importa el archivo "db/models/index.js" dentro del cual fueron configurados los modelos. */
+const setupModels = require("./../db/models/index.js");
+
+/* Se sugiere proteger las variables de entorno que sean delicadas, codificándolas. Esto se logra mandando un URL con todo el esquema de conexión por medio del método "encodeURIComponent()"
 
 La función encodeURIComponent() en javascript codifica un componente de un componente URI (Identificador uniforme de recursos) reemplazando cada copia de un carácter determinado con una o más secuencias de escape que representan la codificación UTF-8 del carácter en cuestión.
 
@@ -1070,11 +1211,12 @@ En este ejemplo, a continuación se conformará una URL de Conexión.
       - dbPort: la variable de entorno "dbPort" que fue creada en el archivo "config.js".
       - dbName: la variable de entorno "dbName" que fue creada en el archivo "config.js".
 */
+
 const URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
 
-/* 
-¡¡¡IMPORTANTE!!!: si se trabajará con el Sistema de Gestión de Bases de Datos MySQL, 
-la línea anterior debería quedar así: 
+/*
+¡¡¡IMPORTANTE!!!: si se trabajará con el Sistema de Gestión de Bases de Datos MySQL,
+la línea anterior debería quedar así:
 
     const URI = `mysql://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
 
@@ -1085,29 +1227,47 @@ la línea anterior debería quedar así:
 /* **************** FIN Para obtener la URI de conexión, se usó parte del código del archivo
  "postgres-pool.js". **************** */
 
-/* Se crea una instancia de la clase "Sequelize". 
+/* Se crea una instancia de la clase "Sequelize".
 
-Al crear la instancia se le envían los siguientes parámetros: 
-  - URL de conexión: en este caso, la URL de conexión se encuentra almacenada en la constante URI. 
+Al crear la instancia se le envían los siguientes parámetros:
+  - URL de conexión: en este caso, la URL de conexión se encuentra almacenada en la constante URI.
   - dialect: el lenguaje utilizado por la base de datos de PostgreSQL. "
-  - logging: el valor "console.log" sirve para que cada vez que se ejecute una consulta por medio de Sequelize ORM, se muestre en consola cuál sería el comando SQL equivalente. 
+  - logging: el valor "true" sirve para que cada vez que se ejecute una consulta por medio de Sequelize ORM, se muestre en consola cuál sería el comando SQL equivalente.
 ,
 
 */
 const sequelize = new Sequelize(URI, {
-  dialect: postgres,
+  dialect: "postgres",
+  /* De forma predeterminada, el atributo "logging", tiene asignado el valor "console.log", por eso se dejó comentada esa línea. */
+  /*logging: console.log,*/
+
   /* ¡¡¡IMPORTANTE!!!: si se deseara utilizar el sistema de gestión de bases de datos "MySQL", el atributo "dialect" debería quedar como se muestra a continuación.
 
         dialect: 'mysql',
   */
 
   // dialect: 'mysql',
-
-  /* Debido a que la siguiente línea hacer referencia al valor predeterminado asignado por Sequelize, se puede omitir. Lo que permitirá es que cuando se ejecute un comando de programación orientada a objetos de Sequelize, se muestre en consola la sentencia SQL a la que equivale dicho comando. */
-  logging: console.log,
 });
 
-export default sequelize;
+/* La función "setupModels()" fue creada en el archivo "db/models/index.js"; y recibe
+como parámetros la conexión que se almacena en la constante "sequelize".
+
+Esta función se encarga de inicializar los modelos correspondientes.
+*/
+setupModels(sequelize);
+/* El método "sync()" se encarga de crear la estructura de la base de datos; es decir, crea las tablas y los campos campos con las características que se definieron dentro de cada modelo. Por ejemplo, la estructura del modelo "User" fue definida en el archivo "user.model.js".
+
+IMPORTANTE: Sin embargo, el método "sync()" usado directamente, como se muestra a continuación, NO ES RECOMENDADO, inclusive "Sequelize" en su sitio web, advierte que no se recomienda utilizar este método en producción. La razón es que este método ejecutará cada vez que se inicie la aplicación TODOS LOS PASOS realizados anteriormente: crear la base de datos, crear las tablas, etc. Lo cual NO ES LO MEJOR, precisamente para corregir este problema se utilizan las MIGRACIONES.
+
+¿Qué son las migraciones?
+Es un registro/bitácora donde se visualizan los cambios realizados a elemento(s) de la base de datos. Esto es necesario para evitar que una aplicación llevada a producción, repita de forma innecesaria procesos que ya hizo una vez. Por ejemplo, no se desea que cada vez que se inicie una aplicación, se creen de nuevo las tablas, se inserten los registros, etc., sino que solamente se haga una vez, y después, en el momento deseado, pues ya realizar las actualizaciones que se crean convenientes.
+
+*/
+
+/* IMPORTANTE: el siguiente código no se utilizó porque todo se manejará con Migraciones. */
+// sequelize.sync();
+
+module.exports = sequelize;
 ```
 
 ## Migraciones
@@ -1118,7 +1278,7 @@ Con las migraciones, puede transferir su base de datos existente a otro estado y
 
 Necesitará la interfaz de línea de comandos (CLI) de _**Sequelize**_. La CLI incluye soporte para migraciones y arranque de proyectos.
 
-## Pasos para crear Migraciones en el ORM "Sequelize" (ESTE PASO PROVOCÓ QUE SE ABANDONARA EL CURSO, PORQUE HABÍA UN PROBLEMA DE EXPORTACIÓN POR LOS MÓDULOS ES6, YA QUE SEQUELIZE UTILIZA PARA LA EXPORTACIÓN MÓDULOS COMÚNES, MIENTRAS QUE ESTE PROYECTO FUE ADAPTADO PARA USAR MÓDULOS EN ES6.)
+## Pasos para crear Migraciones en el ORM "Sequelize"
 
 1. Instalar la librería de _**Sequelize**_ como dependencia de desarrollo, la cual permite hacer uso de la consola de Sequelize (CLI = Interfaz de Línea de Comandos): `npm i sequelize-cli --save-dev`
 2. Se debe crear un archivo de configuración llamado _**.sequelizerc**_. Y se le agregan los siguientes comandos:
@@ -1230,3 +1390,5 @@ El anterior comando serivrá para poder revertir la última migración ejecutada
 Este comando vaciará todas las migraciones, es decir, revierte TODAS las migraciones que se hayan ejecutado anteriormente, haciendo necesario comenzar a realizar todas las migraciones desde cero nuevamente.
 
 7. En este ejemplo, como ya había tablas creadas en la base de datos, se eliminaron, para así probar su creación mediante las migraciones.
+8. Ejecutar el comando: `npm run migrations:run`. Este comanmdo se encargará de crear las tablas indicadas. En este caso, se creará la tabla llamada _**users**_.
+9. Si se accede a _**pgadmin**_ se comprobará que se crearon las tablas. En este caso, se creó la tabla _**users**_; sin embargo, se notará que también se creó una tabla más llamada _**SequelizeMeta**_, dicha tabla es creada por _**Sequelize**_ para almacenar el historial de las migraciones que se han realiado en la aplicación. La importancia de la tabla _**SequelizeMeta**_, es que, debido a que allí lleva el control del historial de migraciones, no va a volver a ejecutar una migración que anteriormente ya fue ejecutada. Por ejemplo, si ya se ejecutó anteriormente el comando `npm run migrations:run`, eso significa que ya fue creada la migración por medio del archivo _**20230306150148-create-user**_; dicho archivo aparecerá listado en la tabla _**SequelizeMeta**_ por lo que no volverá a ejecutarlo, aunque se vuelva a utilizar el comando `npm run migrations:run`.

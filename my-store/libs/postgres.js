@@ -1,7 +1,5 @@
 /* Se importa el módulo "pkg" de la librería "pg" (node-postgres). Luego, se desestructura a partir de ella la constante "Client". */
-import pkg from 'pg';
-
-const { Client } = pkg;
+const { Client } = require('pg');
 
 async function getConnection() {
   /*
@@ -39,4 +37,4 @@ de la clase "Client()".
 }
 
 /* Se exporta la función "getConnection()". */
-export default getConnection;
+module.exports = getConnection;

@@ -3,8 +3,8 @@ Este archivo se encarga de enviar la conexión hacia los modelos, los cuales se 
 
 */
 
-import { User, UserSchema } from './user.model.js';
-
+const { User, UserSchema } = require('./user.model.js');
+const { Customer, CustomerSchema } = require('./customer.model.js');
 /* Esta función se encargará de la configuración de los modelos.
 
 Esta función recibe como parámetro la conexión de Sequelize que se estableció en el archivo
@@ -25,6 +25,9 @@ function setupModels(sequelize) {
  El método "config" recibe como parámetro la conexión de Sequelize. La función "config" fue creada en el archivo "user.model.js", en el donde se puede comprobar que el parámetro "sequelize" lo recibe desde el archivo "sequelize.js".
   */
   User.init(UserSchema, User.config(sequelize));
+  Customer.init(CustomerSchema, Customer.config(sequelize));
+
+  Customer.associate(sequelize.models);
 }
 
-export default setupModels;
+module.exports = setupModels;

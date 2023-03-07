@@ -1,7 +1,7 @@
 'use strict';
 
 /*   Se importa, desde el archivo "user.model.js" las constantes "UserSchema" y "USER_TABLE". */
-import { UserSchema, USER_TABLE } from '../models/user.model.js';
+const { UserSchema, USER_TABLE } = require('./../models/user.model');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {

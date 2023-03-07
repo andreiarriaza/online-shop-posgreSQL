@@ -7,7 +7,9 @@
 
 Por medio de dicho modelo se realizarán las consultas en la base de datos.
 */
-import { User } from '../db/models/user.model.js';
+// import { User } from '../db/models/user.model.js';
+
+const { models } = require('../libs/sequelize');
 
 /*
 
@@ -17,7 +19,7 @@ Para instalarlo, se debe escribir lo siguiente en consola:
     npm i @hapi/boom
 */
 
-import Boom from '@hapi/boom';
+const boom = require('@hapi/boom');
 
 class UserService {
   constructor() {}
@@ -54,7 +56,7 @@ class UserService {
 
     Debido a que este procedimiento se debe realizar de forma asíncrona, se agrega el comando "await".
     */
-    const newUser = await User.create(data);
+    const newUser = await models.User.create(data);
     return newUser;
   }
 
@@ -81,7 +83,7 @@ class UserService {
 
     Debido a que este procedimiento se debe realizar de forma asíncrona, se agrega el comando "await".
     */
-    const response = await User.findAll();
+    const response = await models.User.findAll();
     /* La propiedad "rows" retorna el número de filas que hay dentro de los datos de la tabla "tasks" obtenidos como respuesta.  */
     return response;
   }
@@ -113,7 +115,7 @@ class UserService {
 
     Debido a que este procedimiento se debe realizar de forma asíncrona, se agrega el comando "await".
     */
-    const user = await User.findByPk(id);
+    const user = await models.User.findByPk(id);
     /* Se verifica si la variable "user" es falsa, es decir, se vierifica si está vacía.
 
     */
@@ -122,7 +124,7 @@ class UserService {
       se encuentre vacía. */
 
       /* El comando "throw" se encarga de lanzar el error. */
-      throw Boom.notFound('User not found');
+      throw boom.notFound('User not found');
     }
     return { user };
   }
@@ -171,7 +173,7 @@ class UserService {
     /*  El método "update" forma parte de la librería "Sequelize" y actualizará el registro que se desea modificar, el cual se encuentra almacenado en la constante "user", con los cambios enviados por medio del parámetro "changes". Luego de esperar (await) la respuesta de esta promesa, los resultados s e almacenarán en la constante "response". */
 
     /* IMPORTANTE: tanto con el método "update", como con el método "destroy" de la librería "Sequelize", es indispensable enviar también el atributo "where" con el id del elemento que se quiere actualizar o eliminar. */
-    await User.update(changes, { where: { id } });
+    await user.update(changes, { where: { id } });
     return { user };
   }
   async delete(id) {
@@ -194,10 +196,10 @@ class UserService {
 
     IMPORTANTE: tanto con el método "update", como con el método "destroy" de la librería "Sequelize", es indispensable enviar también el atributo "where" con el id del elemento que se quiere actualizar o eliminar.
     */
-    await User.destroy({ where: { id } });
+    await user.destroy({ where: { id } });
     /* Se retorna el "id" del registro que fue eliminado.*/
     return user;
   }
 }
 
-export default UserService;
+module.exports = UserService;

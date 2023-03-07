@@ -1,8 +1,11 @@
-import express from 'express';
+const express = require('express');
 /* Se importa el archivo que contiene las rutas relacionadas con los productos. */
-import productsRouter from './productsRouter.js';
-import usersRouter from './usersRouter.js';
-import categoriesRouter from './categoriesRouter.js';
+
+const productsRouter = require('./products.router.js');
+const categoriesRouter = require('./categories.router.js');
+const usersRouter = require('./users.router.js');
+// const orderRouter = require('./orders.router.js');
+// const customersRouter = require('./customers.router.js');
 
 function routerApi(app) {
   /* Las siguientes dos líneas se utilizan para modificar la ruta.
@@ -44,4 +47,4 @@ function routerApi(app) {
   router.use('/categories', categoriesRouter);
 }
 
-export default routerApi;
+module.exports = routerApi;

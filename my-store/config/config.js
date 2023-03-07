@@ -3,10 +3,7 @@
 /* El paquete "dotenv" se encarga de leer el archivo "env" que se creó anteriormente. Se debe recordar que las variables de entorno se pueden agregar directamente al archivo
 "package.json", sin embargo, com en esta ocasión se creó el archivo ".env"  este paquete permite que dicho archivo sea leído y carga automáticamente cada una de las variables en el "process" (process.env: este comando es el que permite leer las variables de entorno de Node) de Node JS. */
 // import the "dotenv" package
-import dotenv from 'dotenv';
-
-// call the config function
-dotenv.config();
+require('dotenv').config();
 
 /* Este archivo sirve para configurar las variables de entorno que se
 utilizarán en este proyecto. */
@@ -52,4 +49,4 @@ const config = {
   dbPort: process.env.DB_PORT,
 };
 
-export default config;
+module.exports = { config };

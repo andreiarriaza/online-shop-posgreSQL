@@ -1,6 +1,6 @@
 /* Se importa el archivo "config.js", el cual contiene las variables de entorno que,
 por seguridad, fueron creadas en él. */
-import config from '../config/config.js';
+const { config } = require('../config/config.js');
 
 /* Se sugiere proteger las variables de entorno que sean delicadas, codificándolas. Esto se logra mandando un URL con todo el esquema de conexión por medio del método "encodeURIComponent()"
 

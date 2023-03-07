@@ -73,7 +73,7 @@ Además de descomentar la línea anterior, se agregó dentro del archivo "produc
 
 /* Se importa el método "ValidationError", el cual pertenece a la librería
 "Sequelize". */
-import { ValidationError } from 'sequelize';
+const { ValidationError } = require('sequelize');
 
 /* PRIMER MIDDLWARE DE ERROR: captura el error y lo envía a consola. */
 
@@ -158,4 +158,4 @@ function ormErrorHandler(err, req, res, next) {
   next(err);
 }
 
-export { logErrors, errorHandler, boomErrorHandler, ormErrorHandler };
+module.exports = { logErrors, errorHandler, boomErrorHandler, ormErrorHandler };

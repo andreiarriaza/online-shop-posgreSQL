@@ -19,7 +19,7 @@ npm install --save oracledb # Oracle Database
 
 En este caso, como se está trabajando con _**PostgreSQL**_ se ejecutará el siguiente comando: `npm install --save pg-hstore`
 
-**IMPORTANTE:** en el comando anterior no se incluyó el comando _**pg**_ (es el comando que instala _**node-postgres**_) que sí aparece en el comando original, debido a que dicho comando ya fue utilizado anteriormente cuando se realizó la instalación de _**node-postgres**_.
+**IMPORTANTE:** en el comando anterior no se incluyó el comando _**pg**_ (que se utiliza para instalar _**node-postgres**_), el cual sí aparece en el comando original, debido a que dicho comando ya fue utilizado anteriormente cuando se realizó la instalación de _**node-postgres**_.
 
 3. Dentro de la carpeta _**libs**_ se crea un nuevo archivo llamado: _**sequelize.js**_.
 4. Ahora es necesario conectarse a la base de datos agregando el siguiente código:
@@ -92,17 +92,17 @@ const sequelize = new Sequelize(URI, {
 export default sequelize;
 */
 
-import { Sequelize } from 'sequelize';
+const { Sequelize } = require('sequelize');
 
 /* **************** Para obtener la URI de conexión, se usó parte del código del archivo
  "postgres-pool.js". **************** */
 
 /* Se importa el archivo "config.js", el cual contiene las variables de entorno que,
 por seguridad, fueron creadas en él. */
-import config from '../config/config.js';
+const { config } = require('./../config/config.js');
 
 /* Se importa el archivo "db/models/index.js" dentro del cual fueron configurados los modelos. */
-import setupModels from '../db/models/index.js';
+const setupModels = require('./../db/models/index.js');
 
 /* Se sugiere proteger las variables de entorno que sean delicadas, codificándolas. Esto se logra mandando un URL con todo el esquema de conexión por medio del método "encodeURIComponent()"
 
@@ -195,4 +195,4 @@ Es un registro/bitácora donde se visualizan los cambios realizados a elemento(s
 /* IMPORTANTE: el siguiente código no se utilizó porque todo se manejará con Migraciones. */
 // sequelize.sync();
 
-export default sequelize;
+module.exports = sequelize;
