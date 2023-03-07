@@ -43,7 +43,47 @@ Para su instalación se deben seguir los siguientes pasos:
 
 ## Asociar base de datos de PostgreSQl a Docker
 
-1. Crear el archivo "docker-compose.yml".
+1. Crear el archivo "docker-compose.yml", y agregar el código que se encuentra dentro del servicio llamado "postgres", el cual está en el archivo antes mencionado:
+
+```yml
+# Acá puede colocarse el nombre de la base de datos,  sin embargo, como buena práctica, se acostumbra colocar el nombre del servicio que se utilizará, en este caso, el servicio se llama: postgre.
+# IMPORTANTE: Este servicio se descargará y ejecutará por medio de Docker.
+postgres:
+  # (opcional) Se le asigna el nombre al contenedor. Puede ser cualquier nombre, en este caso, se le asignó el mismo nombre del servicio, pero esto puede cambiar sin ningún problema.
+  container_name: postgres
+  # Se define la versión de PostgreSQL que se usará (correrá) en este contenedor. Si se agrega el comando "latest", se define que se desea trabajar con la versión más reciente de PostgreSQL. Si se deseara una versión en específico, se puede escribir directamente el número de versión deseado.
+
+  # IMPORTANTE: el atributo "image", sirve para indicar lo que es necesario descargar para el funcionamiento del servicio. En este caso, se necesita "postgres" y se eligió la versión más reciente (latest).
+  image: postgres:latest
+
+  # Se definen las variables de entorno (environment), las cuales son las que permiten indicar la configuración inicial que se le asignará a la imagen. En las variables de entorno puede ir, por ejemplo, la siguiente información: nombre de base de datos, usuario, password, etc.
+  environment:
+    # El comando "POSTGRES_DB" sirve para definir el nombre de la base de datos deseada.
+    - POSTGRES_DB=my_store
+
+      # Se define el nombre de usuario.
+    - POSTGRES_USER=walter
+
+      # Se define la contraseña del usuario respectivo.
+    - POSTGRES_PASSWORD=123
+
+  # Se define el puerto en el que se ejecutará PostgresSQL. Normalmente PostgreSQL se ejecuta en el puerto "5432".
+  ports:
+    # Este servicio correrá en el puerto de la computadora "5432" (primer valor).
+    # Internamente, correrá en el puerto "5432" del contenedor (segundo valor).
+    - 5432:5432
+
+  volumes:
+    # Los contenedores NO TIENEN ESTADO. Esto significa que al detener la ejecución de un contenedor, toda la información se borrará. Esto es precisamente lo contrario de lo que se busca conseguir usando bases de datos, pues es indispensable que la información de la base de datos persista (se almacene) aún después de que el contenedor de Docker se haya detenido. Para corregir este problema, es necesario agregar el atributo "volumen" al archivo "docker-compose.yml".
+
+    # Se define en qué lugar se desea almacenar la información de la base de datos del contenedor. Se almacenará en la carpeta "progress_data" del proyecto actual.La información del contenedor se almacenará internamente en la carpeta:
+    # /var/lib/postgres/data
+
+    # Esta ruta es específica para "postgreSQL". La ruta para MariaDB o
+    # para MySQL son diferentes.
+    - ./postgres_data:/var/lib/postgresql/data
+```
+
 2. Levantar el contenedor que se creó en el archivo "docker-compose.yml", es necesario ejecutar el siguiente comando:
 
 ```bash
@@ -67,6 +107,12 @@ docker-compose ps
 ```bash
 docker-compose down
 ```
+
+---
+
+**IMPORTANTE:** Si los pasos **5 al 7** se ejecutaron anteriormente en la aplicación, no es necesario repetirlos.
+
+---
 
 5. Activar el subsistema de Linux en Windows, ejecutando en la consola Power Shell (como administrador) el siguiente comando (ver [link](https://github.com/apoorvpandey-ap/Docker_1/issues/1)):
 
@@ -96,7 +142,112 @@ dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux 
 
 **IMPORTANTE 2:** Los contenedores NO TIENEN ESTADO. Esto significa que al detener la ejecución de un contenedor, toda la información se borrará. Esto es precisamente lo contrario de lo que se busca conseguir usando base de datos, pues es indispensable que la información de la base de datos persista (se almacene) aún después de que el contenedor de Docker se haya detenido. Para corregir este problema, es necesario agregar el atributo "volumen" al archivo "docker-compose.yml".
 
-## Conectarse a la base de datos que está corriendo o ejecutándose
+## Asociar base de datos de MySQL a Docker
+
+1. Crear el archivo "docker-compose.yml", y agregar el código que se encuentra dentro del servicio llamado "mysql", el cual está en el archivo antes mencionado:
+
+```yml
+mysql:
+  # (opcional) Se le asigna el nombre al contenedor. Puede ser
+  # cualquier nombre, en este caso, se le asignó el mismo nombre del servicio,
+  # pero esto puede cambiar sin ningún problema.
+  container_name: mysql
+  # IMPORTANTE: el atributo "image", sirve para indicar lo que es necesario descargar para el funcionamiento del servicio. En este caso, se necesita "mysql" y se eligió la versión "5".
+
+  # Se define la versión de PostgreSQL que se usará (correrá) en este contenedor. Si se agrega el comando "latest", se define que se desea trabajar con la versión más reciente de PostgreSQL. Si se deseara una versión en específico, se puede escribir directamente el número de versión deseado.
+  image: mysql:5
+
+  # Se definen las variables de entorno (environment), las cuales son las que permiten indicar la configuración inicial que se le asignará a la imagen. En las variables de entorno puede ir, por ejemplo, la siguiente información: nombre de base de datos, usuario, password, etc.
+
+  environment:
+    # ¡¡¡IMPORTANTE!!!: estos valores deben coincidir con los que se encuentran asignados dentro del archivo ".env", EXCEPTO las variables "MYSQL_USER" y "MYSQL_PORT", estas sí deben cambiar.
+    # La variable "MYSQL_DATABASE" sirve para definir el nombre de la base de datos deseada.
+    - MYSQL_DATABASE=my_store
+
+      # Se define el nombre de usuario.
+    - MYSQL_USER=root
+
+    # Se define la contraseña del usuario respectivo.
+    - MYSQL_ROOT_PASSWORD=123
+
+    # EL Sistema de Gestión de Bases de Datos MySQL exige que se defina también, como variable de entorno, el puerto a través del cual se realizará la comunicación con la base de datos. El puerto en el que generalmente corre MySQL es el "3306".
+    - MYSQL_PORT=3306
+
+    # Se define el puerto en el que se ejecutará MySQL. Normalmente MySQL se ejecuta en el puerto "3306".
+  ports:
+    # Este servicio correrá en el puerto de la computadora "33061" (primer valor).
+    # Internamente, correrá en el puerto "3306" del contenedor (segundo valor).
+    - 33061:3306
+
+  volumes:
+    # Los contenedores NO TIENEN ESTADO. Esto significa que al detener la ejecución de un contenedor, toda la información se borrará. Esto es precisamente lo contrario de lo que se busca conseguir usando bases de datos, pues es indispensable que la información de la base de datos persista (se almacene) aún después de que el contenedor de Docker se haya detenido. Para corregir este problema, es necesario agregar el atributo "volumen" al archivo "docker-compose.yml".
+
+    # Se define en qué lugar se desea almacenar la información de la base de datos del contenedor. Se almacenará en la carpeta "mysql_data" del proyecto actual.La información del contenedor se almacenará internamente en la carpeta:
+    # /var/lib/mysql
+
+    # Esta ruta es específica para "MySQL". La ruta para MariaDB o para PostgreSQL son diferentes.
+    - ./mysql_data:/var/lib/mysql
+```
+
+2. Levantar el contenedor que se creó en el archivo "docker-compose.yml", es necesario ejecutar el siguiente comando:
+
+```bash
+# El comando "up" hace referencia a que se desea levantar el contenedor.
+# El comando "-d" sirve para que el contenedor se ejecute en segundo plano.
+# Se define el nombre del servicio asociado al contenedor que se desea levantar. Se debe recordar,
+# que dentro del archivo "docker-compose.yml" se definió un servicio con el nombre de "postgres".
+docker-compose up -d postgres
+```
+
+**IMPORTANTE:** si se despliega una ventana, en la que pide confirmar si se desea que el Firewall de Windows permita realiar las modificaciones hechas por Docker. Dar clic en Aceptar.
+
+3. Para corroborar cuáles son los contenedores levantados que existen, se utiliza el comando:
+
+```bash
+docker-compose ps
+```
+
+4. Para cerrar o detener la ejecución de un contenedor, se usa el comando:
+
+```bash
+docker-compose down
+```
+
+---
+
+**IMPORTANTE:** Si los pasos **5 al 7** se ejecutaron anteriormente en la aplicación, no es necesario repetirlos.
+
+---
+
+5. Activar el subsistema de Linux en Windows, ejecutando en la consola Power Shell (como administrador) el siguiente comando (ver [link](https://github.com/apoorvpandey-ap/Docker_1/issues/1)):
+
+```bash
+dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+```
+
+6. Activar la característica de Windows "Hyper-V" la cual sirve para crear máquinas virtuales en Windows. Hay dos maneras de realizar esto:
+
+   a. Ejecutar el comando:
+
+   ```bash
+   Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
+   ```
+
+   b. Activar por medio del Panel de Control:
+
+   - Panel de Control
+   - Programas
+   - Dentro de la sección "Programas y características", seleccionar la opción "Activar o desactivar las características de Windows".
+   - En la ventana que se despliega, buscar la carpeta "Hyper-v" y activar las opciones "Herramientas de administración de Hyper-V" y "Plataforma de "Hyper-V".
+   - Clic en el botón "Aceptar" en todas las ventanas.
+
+7. Abrir _**Docker Desktop**_. Se debería iniciar correctamente. Si se muestra el mensaje de que "Docker" no se inició apropiadamente, es necesario revisar si se realizaron correctamente los pasos del 5 al 7 correctamente.
+
+**Si Docker no se inicia correctamente:**
+
+**IMPORTANTE 2:** Los contenedores NO TIENEN ESTADO. Esto significa que al detener la ejecución de un contenedor, toda la información se borrará. Esto es precisamente lo contrario de lo que se busca conseguir usando base de datos, pues es indispensable que la información de la base de datos persista (se almacene) aún después de que el contenedor de Docker se haya detenido. Para corregir este problema, es necesario agregar el atributo "volumen" al archivo "docker-compose.yml".
+
+## Conectarse a la base de datos manejada por el Sistema de Gestión de Bases de Datos "PostgreSQL"
 
 1. Abrir Docker.
 
@@ -184,61 +335,60 @@ Aunque hay varias opciones de interfaz gráfica para _**PostgreSQL**_, se usará
 
 Para poder usar la imagen de 'pgAdmin' es fundamental hacer lo siguiente:
 
-1. Acceder al sitio web: https://hub.docker.com/search?q=pgadmin
-2. Seleccionar la primera opción de descarga, en este ejemplo, la versión más reciente es: _**dpage/pgadmin4**_ _** (este paquete no debe descargarse, de eso se encargará Docker)**_
+1. Solo para comprobar la versión más reciente de "pgadmnin", se debe acceder al sitio web: https://hub.docker.com/search?q=pgadmin
+2. Comprobar cuál es la primera opción de descarga, en este ejemplo, la versión más reciente es: _**dpage/pgadmin4**_ _** (**este paquete no debe descargarse, de eso se encargará Docker**)**_
 
 3. Se debe agregar el servicio _**pgadmin**_ al archivo _**docker-compose.yml**_, lo cual se consigue agregando los siguientes valores al archivo mencionado:
 
-```bash
+```yml
 # Este servicio permitirá utilizar la interfaz gráfica para trabajar con
-  # PostgreSQL, la cual se llama "pgAdmin".
-  # IMPORTANTE: Este servicio se descargará y ejecutará por medio de Docker.
-  pgadmin:
-    # (opcional) Se le asigna el nombre al contenedor. Puede ser
-    # cualquier nombre, en este caso, se le asignó el mismo nombre del servicio,
-    # pero esto puede cambiar sin ningún problema.
-    container_name: pgadmin
+# PostgreSQL, la cual se llama "pgAdmin".
+# IMPORTANTE: Este servicio se descargará y ejecutará por medio de Docker.
+pgadmin:
+  # (opcional) Se le asigna el nombre al contenedor. Puede ser
+  # cualquier nombre, en este caso, se le asignó el mismo nombre del servicio,
+  # pero esto puede cambiar sin ningún problema.
+  container_name: pgadmin
 
-    # Para poder usar la imagen de 'pgAdmin' es fundamental hacer lo siguiente:
-    # 1. Acceder al sitio web:
-    #  https://hub.docker.com/search?q=pgadmin
-    # 2. Seleccionar la primera opción de descarga, en este ejemplo, la
-    # versión más reciente es: dpage/pgadmin4
-    # 3. Ejecutar el servicio:
-    # docker-compose up -d pgadmin
+  # Para poder usar la imagen de 'pgAdmin' es fundamental hacer lo siguiente:
+  # 1. Acceder al sitio web:
+  #  https://hub.docker.com/search?q=pgadmin
+  # 2. Seleccionar la primera opción de descarga, en este ejemplo, la
+  # versión más reciente es: dpage/pgadmin4
+  # 3. Ejecutar el servicio:
+  # docker-compose up -d pgadmin
 
-    # IMPORTANTE: para corroborar que los servicios
-    # se están ejecutando correctamente, se usa el comando:
-    # docker-compose ps
+  # IMPORTANTE: para corroborar que los servicios
+  # se están ejecutando correctamente, se usa el comando:
+  # docker-compose ps
 
-    # Al definir la imagen, se puede definir la versión específica de "pgadmin",
-    # como se muestra en la siguiente línea:
-    # image: dpage/pgadmin4
+  # Al definir la imagen, se puede definir la versión específica de "pgadmin",
+  # como se muestra en la siguiente línea:
+  # image: dpage/pgadmin4
 
-    # Si no se desea definir la versión específica,
-    # se puede indicar que se desea trabajar con la versión más reciente
-    # utililzando la palabra "latest":
-    image:
-      dpage/pgadmin4
-      # Se definen las variables de entorno (envirnoment), las cuales son las que permiten indicar la configuración
-      # inicial que se le asignará a la imagen.
-    environment:
-      # Se le asigna un correo electrónico por default. El correo
-      # puede ser inventado.
-      - PGADMIN_DEFAULT_EMAIL=admin@mail.com
-      # Se define una contraseña asociada al correo electrónico anterior.
-      - PGADMIN_DEFAULT_PASSWORD=root
+  # Si no se desea definir la versión específica,
+  # se puede indicar que se desea trabajar con la versión más reciente
+  # utililzando la palabra "latest":
+  image:
+    dpage/pgadmin4
+    # Se definen las variables de entorno (envirnoment), las cuales son las que permiten indicar la configuración
+    # inicial que se le asignará a la imagen.
+  environment:
+    # Se le asigna un correo electrónico por default. El correo
+    # puede ser inventado.
+    - PGADMIN_DEFAULT_EMAIL=admin@mail.com
+    # Se define una contraseña asociada al correo electrónico anterior.
+    - PGADMIN_DEFAULT_PASSWORD=root
 
-    ports:
-      # Este servicio correrá en el puerto de la computadora "5050".
-      # Internamente, correrá en el puerto "80" del contenedor.
-      - 5050:80
+  ports:
+    # Este servicio correrá en el puerto de la computadora "5050".
+    # Internamente, correrá en el puerto "80" del contenedor.
+    - 5050:80
 
-      # IMPORTANTE: en este servicio NO es necesario definir un atributo
-      # "volumes" (volúmenes), porque este servicio no necesita
-      # persistencia de datos. El único servicio que necesita persistencia,
-      # es el servicio "postgres", el cual contiene la base de datos.
-
+    # IMPORTANTE: en este servicio NO es necesario definir un atributo
+    # "volumes" (volúmenes), porque este servicio no necesita
+    # persistencia de datos. El único servicio que necesita persistencia,
+    # es el servicio "postgres", el cual contiene la base de datos.
 ```
 
 3. Ejecutar el servicio con el siguiente comando:
@@ -295,6 +445,62 @@ Para acceder al sitio web mencionado, en lo que respecta a este ejemplo, los dat
 12. Dar clic en el botón _**Save**_.
 
 13. Listo. Ahora es posible ejecutar consultas en la base de datos.
+
+## Integración de Node JS con PostgreSQL
+
+Para realizar la integración de Node JS con PostgreSQL se utilizará la librería _**node-postgres**_ cuyo sitio oficial es: https://node-postgres.com/
+
+Esta librería es una colección de módulos que corren con Node JS, los cuales permiten usar promesas y callbacks de forma asíncrona. De forma resumida, es un Controlador de PostgreSQL para Node JS.
+
+Para realizar la isntalación de _**node-postgres**_ es necesario seguir los siguientes pasos:
+
+1. Instalar node-postgres por medio del comando: `npm install pg`
+2. Se crea una carpeta dentro del proyecto, con el nombre deseado. En este caso se nombrará _**libs**_. Dentro de ella se almacenarán las librerías que permiten la conexión con terceros, ya sean API's o bases de datos.
+3. Dentro de la carpeta _**libs**_ se crea el archivo _**postgres.js**_.
+4. Dentro del sitio web de _**[node-postgres](https://node-postgres.com/)**_
+   se encuentra la sección _**Geting started**_ , dentro de la cual se encuentra un ejemplo de cómo implementar Node JS con PostgresSQL. Tomando como referencia dicho código, se adecuará a lo que se necesita en esta aplicación, y se agregará dentro del archivo _**postgres.js**_ recién creado:
+
+```js
+/* Se importa la librería "pkg" de la librería "pg", y se desestructura a partir de ella la constante "Client". */
+import pkg from "pg";
+
+const { Client } = pkg;
+
+async function getConnection() {
+  /*
+Para realizar la conexión con la base de datos, se crea una instancia
+de la clase "Client()".
+*/
+  const client = new Client({
+    /* Se define la configuración de la conexión.
+    - host: se indica el nombre del servidor en el que se encuentra la base
+            de datos. En este caso, como todo se está trabajando con Docker, se le asigna el valor: "localhost".
+
+    - port: sirve para indicar en qué puerto está corriendo la base de datos.
+            En este caso, es en el puerto "5432", el cual es el mismo que se definió en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
+    - user: nombre del usuario de la base de datos. Nuevamente, es el mismo
+            usuario que se definió en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
+
+    - password: password asociado a la base de datos.
+                Nuevamente, es el mismo password que se definió en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
+    - database: nombre de la base de datos. Es el mismo nombre que se definió
+                en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
+
+  */
+    host: "localhost",
+    port: 5432,
+    user: "walter",
+    password: "123",
+    database: "my_store",
+  });
+
+  /* Se realiza la conexión mediante el método "connect()". Pero como dicho método devuelve una promesa, se puede correr de forma asíncrona. Por ello, la función "getConnection()" fue declarada asíncrona (async), y también por ello, en la siguiente línea se utiliza el comando "await". */
+  await client.connect();
+}
+
+/* Se exporta la función "getConnection()". */
+export default getConnection;
+```
 
 ## Abrir pgAdmin y ejecutar consultas
 
@@ -373,6 +579,15 @@ CREATE TABLE tasks (
 	);
 ```
 
+### Ver tablas creadas
+
+1. Desde el panel :**Browser**: dar clic en _**Servers**_.
+2. Dar clic en el servidor deseado. En este caso, en _**MyStore**_.
+3. Seleccionar _**Databases**_.
+4. Elegir la base de datos deseada. En este caso, se llama _**my_store**_.
+5. Seleccionar _**Schemas**_.
+6. Elegir la opción _**Tables**_.
+
 ### Listar todos los campos de una tabla
 
 Cuando se hace referencia a una tabla, _**pgAdmin**_ requiere que el nombre de la tabla vaya precedido del comando `public.`. En este caso, como la tabla se llama _**tasks**_, se hace referencia a ella por medio del comando `public.tasks`.
@@ -381,7 +596,7 @@ Cuando se hace referencia a una tabla, _**pgAdmin**_ requiere que el nombre de l
 SELECT * FROM public.tasks ORDER BY id ASC
 ```
 
-## Agregar registros a una tabla
+### Agregar registros a una tabla
 
 1. Ejecutar una sentencia que permita ver los datos de una tabla. En este caso, se ejecutó la sentencia:
 
@@ -434,62 +649,64 @@ psql -h localhost -d my_store -U walter
 \d+
 ```
 
-## Integración de Node JS con PostgreSQL
+## phpmyadmin: Interfaz gráfica para trabajar con MySQL
 
-Para realizar
-Para realizar la integración de Node JS con PostgreSQL se utilizará la librería _**node-postgres**_ cuyo sitio oficial es: https://node-postgres.com/
+Para trabajar con _**MySQL**_, se usará la interfaz _**phpmyadmin**_ la cual es gratuita y permite ser usada por medio del navegador.
 
-Esta librería es una colección de módulos que corren con Node JS, los cuales permiten usar promesas y callbacks de forma asíncrona. De forma resumida, es un Controlador de PostgreSQL para Node JS.
+### Como configurar phpMyAdmin en Docker
 
-Para realizar la isntalación de _**node-postgres**_ es necesario seguir los siguientes pasos:
+Para poder usar la imagen de 'pgAdmin' es fundamental hacer lo siguiente:
 
-1. Instalar node-postgres por medio del comando: `npm install pg`
-2. Se crea una carpeta dentro del proyecto, con el nombre deseado. En este caso se nombrará _**libs**_. Dentro de ella se almacenarán las librerías que permiten la conexión con terceros, ya sean API's o bases de datos.
-3. Dentro de la carpeta _**libs**_ se crea el archivo _**postgres.js**_.
-4. Dentro del sitio web de _**[node-postgres](https://node-postgres.com/)**_
-   se encuentra la sección _**Geting started**_ , dentro de la cual se encuentra un ejemplo de cómo implementar Node JS con PostgresSQL. Tomando como referencia dicho código, se adecuará a lo que se necesita en esta aplicación, y se agregará dentro del archivo _**postgres.js**_ recién creado:
+1. Se debe agregar el servicio _**phpmyadmin**_ al archivo _**docker-compose.yml**_, lo cual se consigue agregando los siguientes valores al archivo mencionado:
 
-```js
-/* Se importa la librería "pkg" de la librería "pg", y se desestructura a partir de ella la constante "Client". */
-import pkg from "pg";
+```yml
+# Este servicio llamdo "phpmyadmin" permitirá utilizar la interfaz gráfica para trabajar con MySQL. IMPORTANTE: Este servicio se descargará y ejecutará por medio de Docker. "phpmyadmin" es un entorno gráfico para MySQL.
+phpmyadmin:
+  # (opcional) Se le asigna el nombre al contenedor. Puede ser cualquier nombre, en este caso, se le asignó el mismo nombre del servicio, pero esto puede cambiar sin ningún problema.
+  container_name: phpmyadmin
 
-const { Client } = pkg;
+  # Al definir la imagen, se puede definir la versión específica de "pgadmin", como se muestra en la siguiente línea:
+  # image: dpage/pgadmin4
 
-async function getConnection() {
-  /*
-Para realizar la conexión con la base de datos, se crea una instancia
-de la clase "Client()".
-*/
-  const client = new Client({
-    /* Se define la configuración de la conexión.
-    - host: se indica el nombre del servidor en el que se encuentra la base
-            de datos. En este caso, como todo se está trabajando con Docker, se le asigna el valor: "localhost".
+  # IMPORTANTE: el atributo "image", sirve para indicar lo que es necesario descargar para el funcionamiento del servicio. En este caso, se necesita "phpmyadmin".
+  # Si no se desea definir la versión específica, se puede indicar que se desea trabajar con la versión más reciente utililzando la palabra "latest".
+  image: phpmyadmin/phpmyadmin
 
-    - port: sirve para indicar en qué puerto está corriendo la base de datos.
-            En este caso, es en el puerto "5432", el cual es el mismo que se definió en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
-    - user: nombre del usuario de la base de datos. Nuevamente, es el mismo
-            usuario que se definió en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
+  environment:
+    # Se define una contraseña asociada al correo electrónico anterior.
+    - MYSQL_ROOT_PASSWORD=root
 
-    - password: password asociado a la base de datos.
-                Nuevamente, es el mismo password que se definió en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
-    - database: nombre de la base de datos. Es el mismo nombre que se definió
-                en el contenedor "postgres" que se creó en el archivo "docker-compose.yml".
-
-  */
-    host: "localhost",
-    port: 5432,
-    user: "walter",
-    password: "123",
-    database: "my_store",
-  });
-
-  /* Se realiza la conexión mediante el método "connect()". Pero como dicho método devuelve una promesa, se puede correr de forma asíncrona. Por ello, la función "getConnection()" fue declarada asíncrona (async), y también por ello, en la siguiente línea se utiliza el comando "await". */
-  await client.connect();
-}
-
-/* Se exporta la función "getConnection()". */
-export default getConnection;
+    # Indica en qué host está corriendo la base de datos de MySQL. Se define como host, el nombre del servicio con el cual será asociado, en este caso el servicio "mysql".
+    - PMA_HOST=mysql
+  # Se define en qué puerto se desea que corra el entorno gráfico
+  ports:
+    # Este servicio correrá en el puerto de la computadora "8080" (primer valor).
+    # Internamente, correrá en el puerto "80" del contenedor (segundo valor).
+    - 8080:80
 ```
+
+2. Ejecutar el servicio con el siguiente comando:
+
+```bash
+     docker-compose up -d phpmyadmin
+```
+
+IMPORTANTE: para corroborar que los servicios se están ejecutando correctamente, se usa el comando:
+
+```bash
+docker-compose ps
+```
+
+**IMPORTANTE:** Si por alguna razón el servicio _**phpmyadin**_ no se ejecuta correctamente, se debe seguir intentando, hasta que se muestre en la lista obtenida por medio del comando `docker-compose ps`.
+
+3. Acceder en el navegador al puerto asociado al servicio _**phpmyadmin**_. En este caso, en el archivo _**docker-compose.yml**_ se indicó que el archivo al que se conectará el servicio _**phpymyadmin**_ es el **8080**. Por lo que, para poder acceder a _**phpmyadmin**_ en el navegador, se debe escribir la siguiente URL: **http://localhost:8080/**. En esta página web se debe escribir tanto el _**usuario**_ como la _**contraseña**_ asociados al servicio _**mysql**_ que se definieron en el archivo _**docker-compose.yml**_.
+
+Para acceder al sitio web mencionado, en lo que respecta a este ejemplo, los datos son los siguientes:
+
+- Usuario: root
+- Contraseña: 123
+
+4. Listo. Ahora es posible ejecutar consultas en la base de datos.
 
 ## Enviar peticiones a la API mediante POSTMAN
 
@@ -677,13 +894,22 @@ DB_PORT = "";
 
 8. Agregar en el archivo _**.env**_ los datos de conexión reales:
 
-```js
+```bash
 PORT = 3000;
 DB_USER = "walter";
+# ¡¡¡IMPORTANTE!!!: si se usa el sistema de gestión de bases de datos MySQL, se debe asignar el siguiente nombre de usuario.
+
+# DB_USER='root'
+
 DB_PASSWORD = "123";
 DB_HOST = "localhost";
 DB_NAME = "my_store";
 DB_PORT = "5432";
+
+# ¡¡¡IMPORTANTE!!!: si se usa el sistema de gestión de bases de datos MySQL, se debe asignar el siguiente valor de puerto.
+
+# DB_PORT='33061'
+
 ```
 
 9. Instalar el paquete _**dotenv**_ por medio del comando `npm i dotenv`.
@@ -781,15 +1007,18 @@ La librería _**Sequelize**_ utiliza programación orientada a objetos (POO) par
 2. Instalar los _drivers_ que se necesitan en función del lenguaje de Backend con el que se desea trabajar. Las opciones disponibles son las siguientes:
 
 ```bash
-npm install --save pg pg-hstore # Postgres
-npm install --save mysql2
+npm install --save pg pg-hstore # PostgresSQL
+npm install --save mysql2 # MySQL
 npm install --save mariadb
 npm install --save sqlite3
 npm install --save tedious # Microsoft SQL Server
 npm install --save oracledb # Oracle Database
 ```
 
-En este caso, como se está trabajando con _**PostgreSQL**_ se ejecutará el siguiente comando: `npm install --save pg-hstore`
+Si se deseara usar el Sistema de Gestión de Bases de Datos MySQL, el comando sería:
+`npm install --save mysql2`
+
+En este caso, como se está trabajando con _**PostgreSQL**_ se ejecutará el siguiente comando: `npm install --save pg-hstore`.
 
 **IMPORTANTE:** en el comando anterior no se incluyó el comando _**pg**_ (es el comando que instala _**node-postgres**_) que sí aparece en el comando original, debido a que dicho comando ya fue utilizado anteriormente cuando se realizó la instalación de _**node-postgres**_.
 
@@ -843,6 +1072,16 @@ En este ejemplo, a continuación se conformará una URL de Conexión.
 */
 const URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
 
+/* 
+¡¡¡IMPORTANTE!!!: si se trabajará con el Sistema de Gestión de Bases de Datos MySQL, 
+la línea anterior debería quedar así: 
+
+    const URI = `mysql://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+
+*/
+
+// const URI = `mysql://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+
 /* **************** FIN Para obtener la URI de conexión, se usó parte del código del archivo
  "postgres-pool.js". **************** */
 
@@ -857,8 +1096,137 @@ Al crear la instancia se le envían los siguientes parámetros:
 */
 const sequelize = new Sequelize(URI, {
   dialect: postgres,
+  /* ¡¡¡IMPORTANTE!!!: si se deseara utilizar el sistema de gestión de bases de datos "MySQL", el atributo "dialect" debería quedar como se muestra a continuación.
+
+        dialect: 'mysql',
+  */
+
+  // dialect: 'mysql',
+
+  /* Debido a que la siguiente línea hacer referencia al valor predeterminado asignado por Sequelize, se puede omitir. Lo que permitirá es que cuando se ejecute un comando de programación orientada a objetos de Sequelize, se muestre en consola la sentencia SQL a la que equivale dicho comando. */
   logging: console.log,
 });
 
 export default sequelize;
 ```
+
+## Migraciones
+
+Es un registro/bitácora donde se visualizan los cambios realizados a elemento(s) de la base de datos. Esto es necesario para evitar que una aplicación llevada a producción, repita de forma innecesaria procesos que ya hizo una vez. Por ejemplo, no se desea que cada vez que se inicie una aplicación, se creen de nuevo las tablas, se inserten los registros, etc., sino que solamente se haga una vez, y después, en el momento deseado, pues ya realizar las actualizaciones que se crean convenientes.
+
+Con las migraciones, puede transferir su base de datos existente a otro estado y viceversa: esas transiciones de estado se guardan en archivos de migración, que describen cómo llegar al nuevo estado y cómo revertir los cambios para volver al estado anterior.
+
+Necesitará la interfaz de línea de comandos (CLI) de _**Sequelize**_. La CLI incluye soporte para migraciones y arranque de proyectos.
+
+## Pasos para crear Migraciones en el ORM "Sequelize" (ESTE PASO PROVOCÓ QUE SE ABANDONARA EL CURSO, PORQUE HABÍA UN PROBLEMA DE EXPORTACIÓN POR LOS MÓDULOS ES6, YA QUE SEQUELIZE UTILIZA PARA LA EXPORTACIÓN MÓDULOS COMÚNES, MIENTRAS QUE ESTE PROYECTO FUE ADAPTADO PARA USAR MÓDULOS EN ES6.)
+
+1. Instalar la librería de _**Sequelize**_ como dependencia de desarrollo, la cual permite hacer uso de la consola de Sequelize (CLI = Interfaz de Línea de Comandos): `npm i sequelize-cli --save-dev`
+2. Se debe crear un archivo de configuración llamado _**.sequelizerc**_. Y se le agregan los siguientes comandos:
+
+**IMPORTANTE:** el código que está a continuación se debe escribir en el archivo _**.sequelizerc**_ SIN LOS COMENTARIOS, pues de lo contrarío generaría un error. El archivo antes mencionado realmente no es de "JavaScript", por lo que si se genera algún problema con la sintaxis, solo hay que seleccionar en Visual Studio Code el tipo de lenguaje "Plain Text".
+
+El archivo de configuración es necesario porque en este archivo se define
+cuál es la conexión con la base de datos, independientemente de la conexión que ya tenga nuestra aplicación. Es necesario establecer esta conexión, porque las migraciones se conectan por medio de la terminal (CLI) de Sequelize, para lo cual dicha terminal debe establecer también una conexión con esa base de datos.
+
+```
+
+module.exports = {
+
+
+  /* Se indica en qué ubicación se encuentran los modelos */
+  "config": "./db/config.js",
+
+
+
+  "models-path": "./db/models/",
+
+  /* Se indica la ubiación en la que va a encontrar las migraciones. */
+
+  "migrations-path": "./db/migrations/",
+
+  /* Se indica la ubicación de las "seeders" (seed  de datos), tamién llamdas "semillas de información", que es como una carga masiva de datos a la base de datos. */
+
+  "seeders-path": "./db/seeders/",
+};
+
+```
+
+3. Se debe modificar el archivo _**package.json**_ y agregar en la sección de _scripts_ los siguientes elementos:
+
+```json
+
+ "migrations:generate": "sequelize-cli migration:generate --name"
+
+
+```
+
+El comando anterior sirve para indicar que se debe generar una migración usando el CLI de sequelize que fue instalado anteriormente.
+
+La sección _scripts_ del archivo _**package.json**_ debe quedar así:
+
+```json
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "link": "eslint",
+
+    "migrations:generate": "sequelize-cli migration:generate --name"
+  },
+```
+
+4. Ejecutar desde de la terminal el comando: `npm run migrations:generate create-user`
+   El comando `create-user` crea una migración que será utilizada para crear los usuarios de la aplicación.
+
+   Al ejecutar el comando anterior se crea una nueva migración, desplegándose el siguiente mensaje de confirmación:
+
+   ```bash
+
+
+     > my-store@1.0.0 migrations:generate
+     > sequelize-cli migration:generate --name create-user
+
+
+     Sequelize CLI [Node: 18.12.1, CLI: 6.6.0, ORM: 6.29.0]
+
+     migrations folder at "C:\Users\Taller\Documents\GitHub\online-shop-postgreSQL\my-store\db\migrations" already exists.
+     New migration was created at C:\Users\Taller\Documents\GitHub\online-shop-postgreSQL\my-store\db\migrations\20230306150148-create-user.js .
+   ```
+
+   Indicando el lugar en el que fue guardada la migración correspondiente. Al crearse la migración, se crea también un archivo JavaScript con dicha migración. En este caso, dicho archivo se llama _**20230306150148-create-user.js**_.
+
+   Este archivo contiene la estructura básica para las migraciones, pero es necesario agregar el código que permitirá realmente crear nuestras migraciones.
+
+5. Modificar el archivo _**20230306150148-create-user.js**_ (ver archivo para ver las modificaciones realizadas).
+
+6. Ahora que ya se creó el archivo de las migraciones, es necesario definir el comando que ejecutará dichas migraciones. Para ello, es necesario abrir nuevamente el archivo _**package.json**_ y modificar la sección de _scripts_ agregando lo siguiente:
+
+**Primer comando**
+
+```json
+"migrations:run": "sequelize-cli db:migrate"
+```
+
+El anterior comando permitirá que se detecten todas las migraciones que se encuentren dentro de la carpeta "migrations" y las ejecutará.
+
+También es necesario agregar el siguiente comando:
+
+**Segundo comando**
+
+```json
+
+"migrations:revert": "sequelize-cli db:migrate:undo"
+
+```
+
+El anterior comando serivrá para poder revertir la última migración ejecutada.
+
+**Tercer comando (es un comando peligroso, se debe tener mucho cuidado con su uso. )**
+
+```json
+"migrations:delete": "sequelize-cli db:migrate:undo:all"
+```
+
+Este comando vaciará todas las migraciones, es decir, revierte TODAS las migraciones que se hayan ejecutado anteriormente, haciendo necesario comenzar a realizar todas las migraciones desde cero nuevamente.
+
+7. En este ejemplo, como ya había tablas creadas en la base de datos, se eliminaron, para así probar su creación mediante las migraciones.

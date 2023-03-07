@@ -104,7 +104,7 @@ import config from '../config/config.js';
 /* Se importa el archivo "db/models/index.js" dentro del cual fueron configurados los modelos. */
 import setupModels from '../db/models/index.js';
 
-/* Es sugerido proteger las variables de entorno que sean delicadas, codificándolas. Esto se logra mandando un URL con todo el esquema de conexión por medio del método "encodeURIComponent()"
+/* Se sugiere proteger las variables de entorno que sean delicadas, codificándolas. Esto se logra mandando un URL con todo el esquema de conexión por medio del método "encodeURIComponent()"
 
 La función encodeURIComponent() en javascript codifica un componente de un componente URI (Identificador uniforme de recursos) reemplazando cada copia de un carácter determinado con una o más secuencias de escape que representan la codificación UTF-8 del carácter en cuestión.
 
@@ -139,7 +139,18 @@ En este ejemplo, a continuación se conformará una URL de Conexión.
       - dbPort: la variable de entorno "dbPort" que fue creada en el archivo "config.js".
       - dbName: la variable de entorno "dbName" que fue creada en el archivo "config.js".
 */
+
 const URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+
+/*
+¡¡¡IMPORTANTE!!!: si se trabajará con el Sistema de Gestión de Bases de Datos MySQL,
+la línea anterior debería quedar así:
+
+    const URI = `mysql://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+
+*/
+
+// const URI = `mysql://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
 
 /* **************** FIN Para obtener la URI de conexión, se usó parte del código del archivo
  "postgres-pool.js". **************** */
@@ -157,6 +168,13 @@ const sequelize = new Sequelize(URI, {
   dialect: 'postgres',
   /* De forma predeterminada, el atributo "logging", tiene asignado el valor "console.log", por eso se dejó comentada esa línea. */
   /*logging: console.log,*/
+
+  /* ¡¡¡IMPORTANTE!!!: si se deseara utilizar el sistema de gestión de bases de datos "MySQL", el atributo "dialect" debería quedar como se muestra a continuación.
+
+        dialect: 'mysql',
+  */
+
+  // dialect: 'mysql',
 });
 
 /* La función "setupModels()" fue creada en el archivo "db/models/index.js"; y recibe
@@ -165,10 +183,16 @@ como parámetros la conexión que se almacena en la constante "sequelize".
 Esta función se encarga de inicializar los modelos correspondientes.
 */
 setupModels(sequelize);
-/* El método "sync()" se encarga de crear la estructura de la base de datos; es decir, crea las tablas y los campos campos con las características que se definieron dentro de cada modelo.
+/* El método "sync()" se encarga de crear la estructura de la base de datos; es decir, crea las tablas y los campos campos con las características que se definieron dentro de cada modelo. Por ejemplo, la estructura del modelo "User" fue definida en el archivo "user.model.js".
 
-Por ejemplo, la estructura del modelo "User" fue definida en el archivo "user.model.js".
+IMPORTANTE: Sin embargo, el método "sync()" usado directamente, como se muestra a continuación, NO ES RECOMENDADO, inclusive "Sequelize" en su sitio web, advierte que no se recomienda utilizar este método en producción. La razón es que este método ejecutará cada vez que se inicie la aplicación TODOS LOS PASOS realizados anteriormente: crear la base de datos, crear las tablas, etc. Lo cual NO ES LO MEJOR, precisamente para corregir este problema se utilizan las MIGRACIONES.
+
+¿Qué son las migraciones?
+Es un registro/bitácora donde se visualizan los cambios realizados a elemento(s) de la base de datos. Esto es necesario para evitar que una aplicación llevada a producción, repita de forma innecesaria procesos que ya hizo una vez. Por ejemplo, no se desea que cada vez que se inicie una aplicación, se creen de nuevo las tablas, se inserten los registros, etc., sino que solamente se haga una vez, y después, en el momento deseado, pues ya realizar las actualizaciones que se crean convenientes.
+
 */
-sequelize.sync();
+
+/* IMPORTANTE: el siguiente código no se utilizó porque todo se manejará con Migraciones. */
+// sequelize.sync();
 
 export default sequelize;

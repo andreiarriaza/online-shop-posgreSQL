@@ -16,6 +16,7 @@ services:
 
     # Se definen las variables de entorno (environment), las cuales son las que permiten indicar la configuración inicial que se le asignará a la imagen. En las variables de entorno puede ir, por ejemplo, la siguiente información: nombre de base de datos, usuario, password, etc.
     environment:
+      # ¡¡¡IMPORTANTE!!!: estos valores deben coincidir con los que se encuentran asignados dentro del archivo ".env". Aunque para "postreSQL" no se requiere una variable de entorno para el puerto "PORT", para MySQl sí es necesaria, y este número de puerto SÍ DEBE SER DISTINTO DEL PUERTO QUE SE ENCUENTRA ASIGNADO EN EL ARCHIVO  ".env".
       # El comando "POSTGRES_DB" sirve para definir el nombre de la base de datos deseada.
       - POSTGRES_DB=my_store
 
@@ -39,7 +40,7 @@ services:
 
       # Esta ruta es específica para "postgreSQL". La ruta para MariaDB o
       # para MySQL son diferentes.
-      - "./postgres_data:/var/lib/postgresql/data"
+      - ./postgres_data:/var/lib/postgresql/data
 
   # Este servicio llamdo "pgadmin" permitirá utilizar la interfaz gráfica para trabajar con
   # PostgreSQL.
@@ -111,11 +112,12 @@ services:
     # Se definen las variables de entorno (environment), las cuales son las que permiten indicar la configuración inicial que se le asignará a la imagen. En las variables de entorno puede ir, por ejemplo, la siguiente información: nombre de base de datos, usuario, password, etc.
 
     environment:
+      # ¡¡¡IMPORTANTE!!!: estos valores deben coincidir con los que se encuentran asignados dentro del archivo ".env", EXCEPTO las variables "MYSQL_USER" y "MYSQL_PORT", estas sí deben cambiar.
       # El comando "POSTGRES_DB" sirve para definir el nombre de la base de datos deseada.
       - MYSQL_DATABASE=my_store
 
         # Se define el nombre de usuario.
-      - MYSQL_USER=walter
+      - MYSQL_USER=root
 
       # Se define la contraseña del usuario respectivo.
       - MYSQL_ROOT_PASSWORD=123
@@ -136,9 +138,9 @@ services:
       # /var/lib/mysql
 
       # Esta ruta es específica para "MySQL". La ruta para MariaDB o para PostgreSQL son diferentes.
-      - "./mysql_data:/var/lib/mysql"
+      - ./mysql_data:/var/lib/mysql
 
-  # Este servicio llamdo "pgadmin" permitirá utilizar la interfaz gráfica para trabajar con MySQL. IMPORTANTE: Este servicio se descargará y ejecutará por medio de Docker. "phpmyadmin" es un entorno gráfico para MySQL.
+  # Este servicio llamdo "phpmyadmin" permitirá utilizar la interfaz gráfica para trabajar con MySQL. IMPORTANTE: Este servicio se descargará y ejecutará por medio de Docker. "phpmyadmin" es un entorno gráfico para MySQL.
   phpmyadmin:
     # (opcional) Se le asigna el nombre al contenedor. Puede ser cualquier nombre, en este caso, se le asignó el mismo nombre del servicio, pero esto puede cambiar sin ningún problema.
     container_name: phpmyadmin
@@ -151,7 +153,7 @@ services:
     image: phpmyadmin/phpmyadmin
 
     environment:
-      # Se define una contraseña asociada al correo electrónico anterior.
+      # Se define una contraseña asociada. En este caso, se define que la contraseña será la que tenga asignada el usuario "root".
       - MYSQL_ROOT_PASSWORD=root
 
       # Indica en qué host está corriendo la base de datos de MySQL. Se define como host, el nombre del servicio con el cual será asociado, en este caso el servicio "mysql".
