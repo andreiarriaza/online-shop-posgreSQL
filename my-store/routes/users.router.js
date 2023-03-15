@@ -30,6 +30,10 @@ router.get(
   async (req, res, next) => {
     try {
       const { id } = req.params;
+      /*Se espera (await) la ejecución del servicio "find()", el cual se encuentra dentro del archivo "user.service.js", que a su vez se ubica  dentro de la carpeta "services".
+
+    El método "findOne()" del archivo "user.service.js" devuelve el registro que coincida con el valor del "id" enviado.
+     */
       const category = await service.findOne(id);
       res.json(category);
     } catch (error) {
@@ -48,6 +52,10 @@ router.post(
   async (req, res, next) => {
     try {
       const body = req.body;
+      /*Se espera (await) la ejecución del servicio "find()", el cual se encuentra dentro del archivo "user.service.js", que a su vez se ubica  dentro de la carpeta "services".
+
+    El método "create()" del archivo "user.service.js" creará la tabla "USER_TABLE".
+     */
       const newCategory = await service.create(body);
       res.status(201).json(newCategory);
     } catch (error) {
@@ -63,6 +71,10 @@ router.patch(
     try {
       const { id } = req.params;
       const body = req.body;
+      /*Se espera (await) la ejecución del servicio "find()", el cual se encuentra dentro del archivo "user.service.js", que a su vez se ubica  dentro de la carpeta "services".
+
+    El método "update()" del archivo "user.service.js" actualizara la tabla "USER_TABLE".
+     */
       const category = await service.update(id, body);
       res.json(category);
     } catch (error) {
@@ -76,6 +88,10 @@ router.delete(
   async (req, res, next) => {
     try {
       const { id } = req.params;
+      /*Se espera (await) la ejecución del servicio "find()", el cual se encuentra dentro del archivo "user.service.js", que a su vez se ubica  dentro de la carpeta "services".
+
+    El método "delete()" del archivo "user.service.js".
+     */
       await service.delete(id);
       res.status(201).json({ id });
     } catch (error) {

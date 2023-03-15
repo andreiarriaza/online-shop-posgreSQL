@@ -28,7 +28,7 @@ const UserSchema = {
     autoIncrement: true,
     /* Se indica si el campo es o no una llave primaria. */
     primaryKey: true,
-    /* Se define qué tipo de dato es el apropiado para el campo en cuestión. */
+    /* Se define qué tipo de dato es el apropiado para el campo en cuestión. En este caso, un entero (INTEGER). */
     type: DataTypes.INTEGER,
   },
   email: {
@@ -41,13 +41,20 @@ const UserSchema = {
     allowNull: false,
     type: DataTypes.STRING,
   },
+  role: {
+    allowNull: false,
+    /* Se define qué tipo de dato es el apropiado para el campo en cuestión. En este caso, una cadena de texto (STRING). */
+    type: DataTypes.STRING,
+    /* El campo "rol" tendrá el valor por defecto "customer". */
+    defaultValue: 'customer',
+  },
 
   createdAt: {
     allowNull: false,
     type: DataTypes.DATE,
     /* El nombre real del campo es "create_at". El nombre del atributo "createdAt" que está unas líneas arriba, es el nombre con el que dicho campo se manipulará en JavaScript. */
     field: 'create_at',
-    /* Se define que el vvalor predeterminado de este campo, será la fecha actual. */
+    /* Se define que el valor predeterminado de este campo, será la fecha actual. */
     defaultValue: Sequelize.NOW,
   },
 };
@@ -61,11 +68,29 @@ class User extends Model {
   /* Los método estáticos (static) no necesitan que se cree antes una instancia de la clase para poder utilizarse. */
 
   /* Asociaciones */
-  static associate() {
+  static associate(models) {
     // associate
+
+    /*
+    Como se desea que cuando se consulte el endpoint de "users": "http://localhost:3000/api/v1/users/" se muestren los datos de la tabla "users" pero también, de forma anidada, los datos de la tabla "customers", es necesario crear la asociación (relación) correspondiente.
+
+    El método "hasOne()" permite que dos tablas queden asociadas de forma BIDIRECCIONAL, es decir, permitirá que la relación estará establecida desde "customers" hacia "users" y desde "users" hacia "customers".
+
+    Cuando se usa el método "hasOne()" la relación está del lado de la tabla "customers". Por lo que es necesario enviar el campo que sirve como llave foránea (foreign key):
+
+        foreignKey: 'userId'
+
+    Nuevamente, es necesario definir un alias para la relación. Dicho alias será "customer".
+
+
+    */
+    this.hasOne(models.Customer, {
+      as: 'customer',
+      foreignKey: 'userId',
+    });
   }
 
-  /* Configuración */
+  /* Configuración del modelo */
   static config(sequelize) {
     return {
       /* Nombre de la conexión que va a tener. */

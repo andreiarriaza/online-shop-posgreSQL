@@ -1,7 +1,7 @@
 'use strict';
 
 /*   Se importa, desde el archivo "user.model.js" las constantes "UserSchema" y "USER_TABLE". */
-const { UserSchema, USER_TABLE } = require('./../models/user.model');
+const { UserSchema, USER_TABLE } = require('./../models/user.model.js');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -24,7 +24,7 @@ module.exports = {
      */
 
     /* Como se dijo antes, el parámetro "queryInterface" es una API que permite utilizar
-    comandos que ejecutan acciones en la base de datos. En este caso,
+    comandos que ejecutan acciones en la base de datos, es decir, ejecutan acciones que normalmente haría un sentencia SQL. En este caso,
     se ejecutará la función "createTable()", la cual permitirá crear la tabla en la base de datos.
 
     El método "createTable()" recibe dos parámetros:
@@ -43,7 +43,7 @@ module.exports = {
      * await queryInterface.dropTable('users');
      */
 
-    /* Como la función "down()" permite revertir cambios, ahora en lugar de usar el método  "createTable()", se usará el método "drop()", para deshacer el cambio realizado anteriormente. La constante "USER_TABLE" es necesaria para indicar la tabla que se desea eliminar.
+    /* Como la función "down()" permite revertir cambios, ahora en lugar de usar el método  "createTable()", se usará el método "dropTable()", para deshacer el cambio realizado anteriormente. La constante "USER_TABLE" es necesaria para indicar la tabla que se desea eliminar.
 
     Como la función "up()" creó la tabla, la función "down()" se encargaría de revertir ese cambio, eliminando la tabla que anteriormente fue creada.  */
     await queryInterface.dropTable(USER_TABLE);

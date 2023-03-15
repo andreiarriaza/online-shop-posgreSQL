@@ -418,7 +418,7 @@ Para acceder al sitio web mencionado, en lo que respecta a este ejemplo, los dat
 7. Seleccionar la opción "Register".
 8. Elegir la opción "Server".
 9. Se abre un cuadro de diálogo. En la ficha _**General**_ se debe agregar en la casilla _**Name**_ el nombre que se desea dar al servidor. En este ejemplo, se le asignó el nombre: _**MyStore**_
-10. En el mismo cuadro de diálogo, seleccionar la opción _**Connection**_. Y agregar los siguientes datos:
+10. En el mismo cuadro de diálogo, seleccionar la ficha _**Connection**_. Y agregar los siguientes datos:
 
 - Host name/adress: aquí se puede escribir la IP del contenedor en el que se está corriendo PostgreSQL, sin embargo, NO ES RECOMENDABLE usar la IP del contenedor, ya que esta IP cambia cuando el contenedor se destruye. Lo recomendable es agregar acá el nombre del contenedor de _**postgreSQL**_ con el que se desea establecer la conexión. En este caso, en el archivo _**docker-compose.yml**_ se definió que el contenedor que almacena el servicio de _**postgreSQL**_ se llama: _**postgres**_.
 
@@ -433,7 +433,7 @@ Para acceder al sitio web mencionado, en lo que respecta a este ejemplo, los dat
   Ejemplo:
 
   ```txt
-  Host name/adress: postgre
+  Host name/adress: postgres
   Port: 5432
   Maintenance database: my_store
   Username: walter
@@ -1278,7 +1278,7 @@ Con las migraciones, puede transferir su base de datos existente a otro estado y
 
 Necesitará la interfaz de línea de comandos (CLI) de _**Sequelize**_. La CLI incluye soporte para migraciones y arranque de proyectos.
 
-## Pasos para crear Migraciones en el ORM "Sequelize"
+## Crear Migraciones en el ORM "Sequelize" que sirvan para CREAR UNA TABLA
 
 1. Instalar la librería de _**Sequelize**_ como dependencia de desarrollo, la cual permite hacer uso de la consola de Sequelize (CLI = Interfaz de Línea de Comandos): `npm i sequelize-cli --save-dev`
 2. Se debe crear un archivo de configuración llamado _**.sequelizerc**_. Y se le agregan los siguientes comandos:
@@ -1392,3 +1392,746 @@ Este comando vaciará todas las migraciones, es decir, revierte TODAS las migrac
 7. En este ejemplo, como ya había tablas creadas en la base de datos, se eliminaron, para así probar su creación mediante las migraciones.
 8. Ejecutar el comando: `npm run migrations:run`. Este comanmdo se encargará de crear las tablas indicadas. En este caso, se creará la tabla llamada _**users**_.
 9. Si se accede a _**pgadmin**_ se comprobará que se crearon las tablas. En este caso, se creó la tabla _**users**_; sin embargo, se notará que también se creó una tabla más llamada _**SequelizeMeta**_, dicha tabla es creada por _**Sequelize**_ para almacenar el historial de las migraciones que se han realiado en la aplicación. La importancia de la tabla _**SequelizeMeta**_, es que, debido a que allí lleva el control del historial de migraciones, no va a volver a ejecutar una migración que anteriormente ya fue ejecutada. Por ejemplo, si ya se ejecutó anteriormente el comando `npm run migrations:run`, eso significa que ya fue creada la migración por medio del archivo _**20230306150148-create-user**_; dicho archivo aparecerá listado en la tabla _**SequelizeMeta**_ por lo que no volverá a ejecutarlo, aunque se vuelva a utilizar el comando `npm run migrations:run`.
+
+## Crear Migraciones en el ORM "Sequelize" que sirvan para EDITAR UNA TABLA
+
+1. Ejecutar el comando:
+
+   ```bash
+   npm run migrations:generate nombreMigración
+   ```
+
+   En este ejemplo, se desea crear una migración con el nombre "add-role":
+
+   ```bash
+   npm run migrations:generate add-role
+   ```
+
+2. Al ejecutar el comando anteiror se crea un archivo con un nombre similar a este: _**20230308224358-add-role**_. Dentro de dicho archivo, se debe agregar el siguiente código:
+
+```js
+"use strict";
+
+const { UserSchema, USER_TABLE } = require("./../models/user.model");
+
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up(queryInterface /*, Sequelize*/) {
+    /**
+     * Add altering commands here.
+     *
+     * Example:
+     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
+     */
+
+    /* El método "addColumn()" permite agregar una columna en la tabla de la base de datos indicada.
+    El método "addColumn()" tiene tres parámetros:
+      - Primer parámetro: indica el nombre de la tabla a modificar. En este caso, se
+                          modificará la tabla llamada "USER_TABLE", la cual se definió en el archivo "user.model.js".
+      - Segundo parámetro: nombre de la columna que se agregará. Dicha columna se llama,
+                           en este caso, "role".
+      - Tercer parámetro: el esquema que va a tener la nueva columna. En este caso, el
+                          esquema del campo "role", se encuentra en el campo "role"de la constante "UserSchema", la cual se importó desde el archivo "user.model.js".
+
+    */
+    await queryInterface.addColumn(USER_TABLE, "role", UserSchema.role);
+  },
+
+  async down(queryInterface /*, Sequelize*/) {
+    /**
+     * Add reverting commands here.
+     *
+     * Example:
+     * await queryInterface.dropTable('users');
+     */
+
+    /*  Como la función "down()" permite revertir cambios, ahora en lugar de usar el método  "addColumn()", se usará el método "removeColumn()", para deshacer el cambio realizado anteriormente.
+
+    Es necesario indicar el nombre del campo que se desea eliminar (en este caso, el campo "role") y también la tabla a la que pertenece dicho campo (en este caso, la tabla "USER_TABLE").
+     */
+    await queryInterface.removeColumn(USER_TABLE, "role");
+  },
+};
+```
+
+3. Se ejecuta el comando que sirve para ejecutar las migraciones:
+
+```bash
+npm run migrations:run
+```
+
+## Relaciones en Sequelize
+
+A continuación se verán los tipos de relaciones disponibles en _**Sequelize**_.
+
+### Relaciones de Uno a Uno
+
+_**Sequelize**_ tiene dos métodos que permiten expresar ese tipo de relaciones:
+
+- HasOne: si se tuvieran dos entidades, una llamada "A" y otra "B", y se deseara que
+  quien "cargue" con la relación sea la entidad "B", el método apropiado sería precisamente este.
+
+- BelongsTo: si se tuvieran dos entidades, una llamada "A" y otra "B", y se deseara que
+  quien "cargue" con la relación sea la entidad "A", el método apropiado sería precisamente este.
+
+  En este caso específico, se necesita que un "customer" tenga un "usuario", y que la relación sea cargada desde un "customer", por lo que el método que se utilizará será _**BelongsTo**_.
+
+#### Pasos para crear las relaciones de Uno a Uno
+
+1. Las relaciones se crean dentro del archivo del modelo respectivo, específicamente dentro de la clase que se encuentra dentro de cada modelo. Por ejemplo, en este caso, la relación se creará dentro del archivo _**customer.model.js**_, dentro de la Clase llamada _**Customer**_. La relación se crea dentro del método estático llamado _**associate**_.
+
+Ejemplo de la creación de una relación:
+
+```js
+class Customer extends Model {
+  /*Dentro del método estático "associate()" se crean las relaciones deseadas.  */
+  static associate(models) {
+    this.belongsTo(models.User, { as: "user" });
+  }
+
+  /* Configuración del modelo */
+  static config(sequelize) {
+    return {
+      /* Nombre de la conexión que va a tener. */
+      sequelize,
+      /* Nombre de la tabla. */
+      tableName: CUSTOMER_TABLE,
+      /* Nombre que se le desea asignar al modelo. */
+      modelName: "Customer",
+      /* Se elige si se desea o no crear campos por defecto.  */
+      timestamps: false,
+    };
+  }
+}
+```
+
+2. Abrir el archivo _**db/models/index.js**_ y agregar dentro de la clase _**setupModels**_, la siguiente línea de código:
+
+```js
+/* ********** Área para agregar las relacones (asociaciones). ********** */
+
+/* Se indica que la clase "Customer" tiene una asociación, y se le envían los modelos de dicha asociación (sequelize.models). */
+Customer.associate(sequelize.models);
+```
+
+3. El siguiente paso es generar la migración respectiva en nuestr aplicación, ejecutando el siguiente comando:
+
+```bash
+npm run migrations:generate --name nombreMigración
+```
+
+En este caso, la migración servirá para crear la tabla "CUSTOMERS_TABLE", así que la migración se nombrará "create-customers":
+
+```bash
+npm run migrations:generate --name create-customers
+```
+
+4. Al crear la migración anterior, se genera el archivo que corresponde a dicha migración. En este caso, dicho archivo se llama: _**20230309174140-create-customers**_, el cual debe contener los comandos que ejecutará dicha migración, los cuales son los siguientes:
+
+```js
+"use strict";
+
+/*   Se importa, desde el archivo "customer.model.js" las constantes "CustomerSchema" y "CUSTOMER_TABLE". */
+const {
+  CustomerSchema,
+  CUSTOMER_TABLE,
+} = require("./../models/customer.model.js");
+
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up(queryInterface /*, Sequelize*/) {
+    /**
+     * Add altering commands here.
+     *
+     * Example:
+     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
+     */
+    /* Como se dijo antes, el parámetro "queryInterface" es una API que permite utilizar
+    comandos que ejecutan acciones en la base de datos, es decir, ejecutan acciones que normalmente haría un sentencia SQL. En este caso,
+    se ejecutará la función "createTable()", la cual permitirá crear la tabla en la base de datos.
+
+    El método "createTable()" recibe dos parámetros:
+      - CUSTOMER_TABLE: esta constante fue creada en el archivo "customer.model.js" y contiene el nombre de la tabla que se creará.
+      - CustomerSchema: contiene la estructura o esquema de la tabla que se va a crear. Dicho esquema también fue definido dentro del archivo "customer.model.js". */
+
+    await queryInterface.createTable(CUSTOMER_TABLE, CustomerSchema);
+  },
+
+  async down(queryInterface /*, Sequelize*/) {
+    /**
+     * Add reverting commands here.
+     *
+     * Example:
+     * await queryInterface.dropTable('users');
+     */
+
+    /* Como la función "down()" permite revertir cambios, ahora en lugar de usar el método  "createTable()", se usará el método "drop()", para deshacer el cambio realizado anteriormente. La constante "CUSTOMER_TABLE" es necesaria para indicar la tabla que se desea eliminar.
+
+    Como la función "up()" creó la tabla, la función "down()" se encargaría de revertir ese cambio, eliminando la tabla que anteriormente fue creada.  */
+    await queryInterface.dropTable(CUSTOMER_TABLE);
+  },
+};
+```
+
+5. Ahora, es necesario ejecutar la migración anterior para que la tabla sea creada en la base de datos. En este caso, dicha tabla se llama "CUSTOMER_TABLE". Esto se hace por medio de los comandos:
+
+   ```bash
+   npm run migrations:run
+   ```
+
+6. Ahora se debe abrir el archivo _**customer_schema.js**_ y agregar la validación que corresponde al campo _**userId**_, el cual es el usado para establecer la relación entre la tabla _**CUSTOMER_TABLE**_ y la tabla _**USER_TABLE**_. En este caso, dicha validación queda así: `
+
+```js
+const userId = Joi.number().integer();
+```
+
+También es necesario agregar, dentro de ese mismo archivo, dentro del método _**createCustomerSchema**_ la siguiente línea para que el campo _**userId**_ sea requerido al momento de crear la tabla _**CUSTOMER_TABLE**_:
+
+```js
+userId: userId.required(),
+```
+
+También es necesario agrega dentro del método _**updateCustomerSchema**_, el atributo y valor llamados _**userId**_:
+
+```js
+const updateCustomerSchema = Joi.object({
+  name,
+  lastName,
+  phone,
+  userId,
+});
+```
+
+7. Ahora es necesario modificar el archivo _**customer.service.js**_ y agregar el siguiente método:
+
+```js
+  /* La función "create()" se encarga de crear la tabla "Customer". */
+  async create(data) {
+    /*
+
+    La constante "newCustomer" almacenará los datos del usuario que se insertará en la base de datos.
+
+    Se accede al modelo "Customer", el cual fue importado en este archivo, y que fue creado en el archivo "customer.model.js". .
+
+    El método "create()" forma parte de la librería "Sequelize" y se encarga de insertar campos en una tabla de la base de datos, en este caso, en la tabla "CUSTOMER_TABLE". Dicha tabla fue creada en el mismo archivo dentro del cual se creó el modelo llamado "Customer", es decir, en el archivo "customer.model.js".
+
+    Debido a que este procedimiento se debe realizar de forma asíncrona, se agrega el comando "await".
+    */
+    const newCustomer = await models.Customer.create(data, {
+      include: ['user'],
+    });
+    return newCustomer;
+  }
+```
+
+8. Abrir el archivo _**routes/index.js**_ y agregar el endpoint _**/customers**_. Dicho archivo debe quedar así:
+
+```js
+const express = require("express");
+/* Se importa el archivo que contiene las rutas relacionadas con los productos. */
+
+/* Se importan los archivos "router" que corresponde a cada sección del sitio web, los cuales serán asociados a un endpoint específico. */
+const productsRouter = require("./products.router.js");
+const categoriesRouter = require("./categories.router.js");
+const usersRouter = require("./users.router.js");
+const orderRouter = require("./orders.router");
+const customersRouter = require("./customers.router.js");
+// const orderRouter = require('./orders.router.js');
+// const customersRouter = require('./customers.router.js');
+
+function routerApi(app) {
+  /* Las siguientes dos líneas se utilizan para modificar la ruta.
+  Una buena práctica al trabajar con API's es definir rutas específicas indicando la versión
+  de la API a la que se desea conectar. Dicha versión va precedida de la palabra "api". Esto es un estándar
+  en el trabajo con API's.
+
+  Para conseguir esto, se crea una instancia del "router" de "express":
+      const router = express.Router();
+
+  Luego, se define por medio del método "use", la ruta (/api/v1) que será asignada a la instancia "router".
+
+  Por útlimo, se va definiendo cada ruta a partir de la instancia "router":
+      router.use('/products', productsRouter);
+
+  Esto significa, que para acceder a la ruta de "products", ahora se deberá escribir la ruta:
+
+      localhost:3000/api/v1/products
+
+
+
+
+
+
+  */
+  const router = express.Router();
+  app.use("/api/v1", router);
+
+  /* Se define la ruta que será asignada a "productsRouter", el cual hace referencia al módulo "router" que se exportó
+  desde el archivo "products.router.js". */
+  router.use("/products", productsRouter);
+
+  /* Se define la ruta que será asignada a "usersRouter", el cual hace referencia al módulo "router" que se exportó
+  desde el archivo "users.router.js". */
+  router.use("/users", usersRouter);
+
+  /* Se define la ruta que será asignada a "categoriesRouter", el cual hace referencia al módulo "router" que se exportó
+  desde el archivo "categories.router.js". */
+  router.use("/categories", categoriesRouter);
+
+  /* Se define la ruta que será asignada a "ordersRouter", el cual hace referencia al módulo "router" que se exportó
+  desde el archivo "orders.router.js". */
+  router.use("/orders", orderRouter);
+
+  /* Se define la ruta que será asignada a "customerRouter", el cual hace referencia al módulo "router" que se exportó
+  desde el archivo "customers.router.js". */
+  router.use("/customers", customersRouter);
+}
+
+module.exports = routerApi;
+```
+
+9. Por último, ingresar a _**pgadmin**_ y realizar los siguientes pasos para comprobar que la relación fue creada apropiadamente:
+
+- Clic derecho sobre la tabla _**customers**_.
+- Seleccionar la opción _**ERD for table**_. Se generará el diagrama que corresponde a dicha base de datos, y se mostrará la relación creada.
+
+### Modifica el campo de una tabla con migraciones
+
+1. Crear una nueva migración, usando el comando:
+
+```bash
+npm run migrations:generate nombreMigración
+```
+
+Para este ejemplo, se creará la siguiente migración:
+
+```bash
+npm run migrations:generate change-user-id
+```
+
+2. Abrir el archivo que se generó después de ejecutar el comando anterior. En este caso, el archivo se llama: _**20230310155944-change-user-id**_.
+
+Luego agregar en él lo siguiente:
+
+```js
+/* IMPORTANTE: esta migración se creó para modificar el campo "user_id", de tal forma que sea único. Este cambio también se ve reflejado en el archivo "customer.model.js", dentro del cual, al campo "userId" se le asignó el atributo "unique: true".
+
+Para que el cambio realizado en el archivo anterior se aplique a la tabla de la base de datos, se creó esta migración.
+*/
+"use strict";
+
+/*   Se importa, desde el archivo "customer.model.js" la constante "CUSTOMER_TABLE". */
+const { CUSTOMER_TABLE } = require("./../models/customer.model.js");
+
+/* Se importa el objeto "DataTypes" de Sequelize. */
+const { DataTypes } = require("sequelize");
+
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up(queryInterface /*, Sequelize*/) {
+    /**
+     * Add altering commands here.
+     *
+     * Example:
+     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
+     */
+
+    /* Como se dijo antes, el parámetro "queryInterface" es una API que permite utilizar
+    comandos que ejecutan acciones en la base de datos, es decir, ejecutan acciones que normalmente haría un sentencia SQL. En este caso,
+    se ejecutará la función "changeColumn()", la cual permitirá crear la tabla en la base de datos.
+
+    El método "changeColumn()" recibe dos parámetros:
+      - CUSTOMER_TABLE: esta constante fue creada en el archivo "customer.model.js" y contiene el nombre de la tabla que se creará.
+      - 'user_id': este es el nombre del campo (columna) que se desea modificar. . */
+
+    await queryInterface.changeColumn(CUSTOMER_TABLE, "user_id", {
+      /* El nombre real del campo es "user_id". El nombre del atributo "userId" que está unas líneas arriba, es el nombre con el que dicho campo se manipulará en JavaScript. */
+      field: "user_id",
+      allowNull: false,
+      type: DataTypes.INTEGER,
+      unique: true,
+    });
+  },
+
+  async down(queryInterface /*, Sequelize*/) {
+    /**
+     * Add reverting commands here.
+     *
+     * Example:
+     * await queryInterface.dropTable('users');
+     */
+    /* EN ESTE CASO, NO SE AGREGÓ NINGUNA ACCIÓN ASOCIADA A LA FUNCIÓN "down()". */
+  },
+};
+```
+
+3. Por último, ejecutar el comando:
+
+```bashh
+npm run migrations:run
+```
+
+### Relaciones de Uno a Muchos
+
+Para establecer una relación de uno a muchos, _**sequelize**_ utiliza la función _**hasMany**_. Como en este ejemplo se desea crear una relación entre la tabla **categories** y **products**\_, la relación quedará en la tabla **productos**.
+
+#### Pasos para crear las relaciones de Uno a Muchos
+
+1. Revisar el código que se agregó en los archivos: _**category.model.js**_ , _**product.model.js**_ e _**db/models/index.js**_.
+2. Se genera la migración que corresponda, usando el comando:
+
+```bash
+npm run migrations:generate nombreMigración
+```
+
+En este caso, la migración se llamará "products" (dentro de esta migración se crearán dos tablas: la tabla "categories" y la tabla "products"), así que el comando quedaría así:
+
+```bash
+npm run migrations:generate products
+```
+
+3.  Dentro de la migración creada anteriormente se agrega el siguiente código:
+
+```js
+"use strict";
+
+/*   Se importan, desde el archivo "category.model.js" las constantes "CategorySchema" y "CATEGORY_TABLE". */
+const {
+  CategorySchema,
+  CATEGORY_TABLE,
+} = require("../models/category.model.js");
+
+const { ProductSchema, PRODUCT_TABLE } = require("../models/product.model.js");
+
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up(queryInterface /*, Sequelize */) {
+    /**
+     * Add altering commands here.
+     *
+     * Example:
+     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
+     */
+
+    /* Como se dijo antes, el parámetro "queryInterface" es una API que permite utilizar
+    comandos que ejecutan acciones en la base de datos, es decir, ejecutan acciones que normalmente haría un sentencia SQL. En este caso,
+    se ejecutará la función "createTable()", la cual permitirá crear la tabla en la base de datos.
+
+    El método "createTable()" recibe dos parámetros:
+      - CATEGORY_TABLE: esta constante fue creada en el archivo "category.model.js" y contiene el nombre de la tabla que se creará.
+      - CategorySchema: contiene la estructura o esquema de la tabla que se va a crear. Dicho esquema también fue definido dentro del archivo "category.model.js". */
+    await queryInterface.createTable(CATEGORY_TABLE, CategorySchema);
+    await queryInterface.createTable(PRODUCT_TABLE, ProductSchema);
+  },
+
+  async down(queryInterface /*, Sequelize */) {
+    /**
+     * Add reverting commands here.
+     *
+     * Example:
+     * await queryInterface.dropTable('users');
+     */
+
+    /* Como la función "down()" permite revertir cambios, ahora en lugar de usar el método  "createTable()", se usará el método "dropTable()", para deshacer el cambio realizado anteriormente. La constante "CATEGORY_TABLE" es necesaria para indicar la tabla que se desea eliminar.
+
+    Como la función "up()" creó la tabla, la función "down()" se encargaría de revertir ese cambio, eliminando la tabla que anteriormente fue creada.  */
+
+    await queryInterface.dropTable(CATEGORY_TABLE);
+    /* Como la función "down()" permite revertir cambios, ahora en lugar de usar el método  "createTable()", se usará el método "dropTable()", para deshacer el cambio realizado anteriormente. La constante "PRODUCT_TABLE" es necesaria para indicar la tabla que se desea eliminar.
+
+    Como la función "up()" creó la tabla, la función "down()" se encargaría de revertir ese cambio, eliminando la tabla que anteriormente fue creada.  */
+    await queryInterface.dropTable(PRODUCT_TABLE);
+  },
+};
+```
+
+4. Luego, es necesario ejecutar la migración, ejecutando el comando: `npm run migrations:run`.
+
+### Relaciones de Muchos a Muchos
+
+Para crear este tipo de relaciones, _**Sequelize**_ usa el método _**belongsToMany**_.
+
+En este ejemplo, se creará una relación de muchos a muchos entre la tabla _**products**_ y la tabla _**orders**_.
+
+#### Pasos para crear las relaciones de Muchos a Muchos
+
+1. Es necesario crear el modelo de la la tabla de unión que vinculará a la tabla _**orders**_ y la tabla _**products**_. En este caso, dicho modelo se llama _**order-product.model.js**_ y contiene el siguiente código:
+
+```js
+/* Esta tabla es la tabla de unión para la relación de muchos a muchos establecida entre la tabla "customers" y la tabla "orders". */
+
+const { Model, DataTypes, Sequelize } = require("sequelize");
+
+const { ORDER_TABLE } = require("./order.model");
+const { PRODUCT_TABLE } = require("./product.model");
+
+const ORDER_PRODUCT_TABLE = "orders_products";
+
+const OrderProductSchema = {
+  id: {
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+    type: DataTypes.INTEGER,
+  },
+  createdAt: {
+    allowNull: false,
+    type: DataTypes.DATE,
+    field: "created_at",
+    defaultValue: Sequelize.NOW,
+  },
+  amount: {
+    allowNull: false,
+    type: DataTypes.INTEGER,
+  },
+  orderId: {
+    field: "order_id",
+    allowNull: false,
+    type: DataTypes.INTEGER,
+    /*El atributo references, sirve para definir cuál será la llave primaria con la que irá relacionado el campo "orderId". En este caso, la llave primaria se encuentra dentro de la tabla "ORDER_TABLE", y el campo tiene tiene asignado el nombre "id".  */
+    references: {
+      model: ORDER_TABLE,
+      key: "id",
+    },
+    onUpdate: "CASCADE",
+    onDelete: "SET NULL",
+  },
+
+  /* Como esta es una tabla de unión entre las tablas "orders" y "products", es necesario también enlazar el campo "productId".  */
+  productId: {
+    field: "product_id",
+    allowNull: false,
+    type: DataTypes.INTEGER,
+    /*El atributo references, sirve para definir cuál será la llave primaria con la que irá relacionado el campo "productId". En este caso, la llave primaria se encuentra dentro de la tabla "PRODUCT_TABLE", y el campo tiene tiene asignado el nombre "id".  */
+    references: {
+      model: PRODUCT_TABLE,
+      key: "id",
+    },
+    onUpdate: "CASCADE",
+    onDelete: "SET NULL",
+  },
+};
+
+class OrderProduct extends Model {
+  static associate(models) {
+    //
+  }
+
+  static config(sequelize) {
+    return {
+      /* Nombre de la conexión que va a tener. */
+      sequelize,
+      /* Nombre de la tabla. */
+      tableName: ORDER_PRODUCT_TABLE,
+      /* Nombre que se le desea asignar al modelo. */
+      modelName: "OrderProduct",
+      /* Se elige si se desea o no crear campos por defecto.  */
+      timestamps: false,
+    };
+  }
+}
+
+module.exports = { OrderProduct, OrderProductSchema, ORDER_PRODUCT_TABLE };
+```
+
+2. Generar la migración respectiva, empleando el comando:
+
+```bash
+npm run migrations:generate nombreMigración
+```
+
+En este caso, quedaría así:
+
+```bash
+npm run migrations:generate order-product
+```
+
+3. Acceder a la migración que se generó en el paso anterior y agregar el siguiente código:
+
+```js
+"use strict";
+
+const {
+  ORDER_PRODUCT_TABLE,
+  OrderProductSchema,
+} = require("../models/order-product.model.js");
+
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up(queryInterface /*, Sequelize*/) {
+    /**
+     * Add altering commands here.
+     *
+     * Example:
+     * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
+     */
+    /* Como se dijo antes, el parámetro "queryInterface" es una API que permite utilizar
+    comandos que ejecutan acciones en la base de datos, es decir, ejecutan acciones que normalmente haría un sentencia SQL. En este caso,
+    se ejecutará la función "createTable()", la cual permitirá crear la tabla en la base de datos.
+
+    El método "createTable()" recibe dos parámetros:
+      - ORDER_PRODUCT_TABLE: esta constante fue creada en el archivo "order-product.model.js" y contiene el nombre de la tabla que se creará.
+      - OrderProductSchema: contiene la estructura o esquema de la tabla que se va a crear. Dicho esquema también fue definido dentro del archivo "order-product.model.js". */
+    await queryInterface.createTable(ORDER_PRODUCT_TABLE, OrderProductSchema);
+  },
+
+  async down(queryInterface /* , Sequelize*/) {
+    /**
+     * Add reverting commands here.
+     *
+     * Example:
+     * await queryInterface.dropTable('users');
+     */
+    /* Como la función "down()" permite revertir cambios, ahora en lugar de usar el método  "createTable()", se usará el método "dropTable()", para deshacer el cambio realizado anteriormente. La constante "ORDER_PRODUCT_TABLE" es necesaria para indicar la tabla que se desea eliminar.
+
+    Como la función "up()" creó la tabla, la función "down()" se encargaría de revertir ese cambio, eliminando la tabla que anteriormente fue creada.  */
+    await queryInterface.dropTable(ORDER_PRODUCT_TABLE);
+  },
+};
+```
+
+4. Ahora, se debe ejecutar la migración anterior, mediante el comando:
+
+```bash
+npm run migrations:run
+```
+
+5. Se modifica el archivo _**order.model.js**_, el cual quedaría de la siguiente manera:
+
+```js
+/* Se importan las utilidades "Model", "DataTypes" y "Sequelize"
+que forman parte del ORM llamado Sequelize. */
+const { Model, DataTypes, Sequelize } = require("sequelize");
+
+const { CUSTOMER_TABLE } = require("./customer.model.js");
+
+const ORDER_TABLE = "orders";
+
+const OrderSchema = {
+  id: {
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+    type: DataTypes.INTEGER,
+  },
+  /* El campo "customerId" es el que servirá para establecer la relación de la tabla "ORDER_TABLE" con la tabla "CUSTOMER_TABLE". */
+  customerId: {
+    field: "customer_id",
+    allowNull: false,
+    type: DataTypes.INTEGER,
+    /*El atributo references, sirve para definir cuál será la llave primaria con la que irá relacionado el campo "customerId". En este caso, la llave primaria se encuentra dentro de la tabla "CUSTOMER_TABLE", y el campo tiene tiene asignado el nombre "id".  */
+    references: {
+      model: CUSTOMER_TABLE,
+      key: "id",
+    },
+    onUpdate: "CASCADE",
+    onDelete: "SET NULL",
+  },
+  createdAt: {
+    allowNull: false,
+    type: DataTypes.DATE,
+    field: "created_at",
+    defaultValue: Sequelize.NOW,
+  },
+};
+
+class Order extends Model {
+  static associate(models) {
+    /* Se usó el método "belongsTo" porque una orden pertenece solamente a un cliente.
+     */
+    /* Se crea una relación de tipo "belongsTo()". Esto significa que la relación se correrá desde la entidad "ORDER_TABLE"; estableciéndose dicha relación desde la entidad "CUSTOMER_TABLE" hacia la entidad "ORDER_TABLE". El atributo "as" sirve para definir un alias que represente a la relación que se está estableciendo. En este caso, la relación creada entre la tabla "customers" y la tabla "orders", tendrá asignado el alias: "customer".
+     */
+    this.belongsTo(models.Customer, {
+      as: "customer",
+    });
+    /* Se usó el método "belongToMany" porque una orden puede estar asociada a varios productos. */
+    this.belongsToMany(models.Product, {
+      /*
+      El atributo "as" sirve para definir un alias que represente a la relación que se está estableciendo. En este caso, la relación creada entre la tabla "orders" y la tabla "order-product", tendrá asignado el alias: "items". Esta relación se establece por medio del modelo que corresponde a la tabla "order-products", el cual es el modelo "OrderProduct".
+
+      Se indica que la relación se establacerá con la llave foránea "orderId" de la tabla "order-product", pero también se establecerá con la otra llave foránea que también se encuentra en la tabla "order-product".
+      */
+      as: "items",
+      through: models.OrderProduct,
+      foreignKey: "orderId",
+      otherKey: "productId",
+    });
+  }
+
+  static config(sequelize) {
+    return {
+      sequelize,
+      tableName: ORDER_TABLE,
+      modelName: "Order",
+      timestamps: false,
+    };
+  }
+}
+
+module.exports = { Order, OrderSchema, ORDER_TABLE };
+```
+
+6. Agregar el esquema siguiente dentro del archivo que corresponda. En este caso, dicho archivo es _**order.schema.js**_:
+
+```js
+const Joi = require("joi");
+
+const id = Joi.number().integer();
+const customerId = Joi.number().integer();
+
+/* Estas constantes servirán para validar los campos que son indispensables para el adecuado funcionamiento
+de la tabla "order-product" (tabla de unión). */
+const orderId = Joi.number().integer();
+const productId = Joi.number().integer();
+const amount = Joi.number().integer().min(1);
+
+const getOrderSchema = Joi.object({
+  id: id.required(),
+});
+
+const createOrderSchema = Joi.object({
+  customerId: customerId.required(),
+});
+
+/* La constante "addItemSchema", servirá para configurar el esquema que controlará el ingreso de productos
+a la tabla correspondiente. */
+const addItemSchema = Joi.object({
+  orderId: orderId.required(),
+  productId: productId.required(),
+  amount: amount.required(),
+});
+
+module.exports = { getOrderSchema, createOrderSchema, addItemSchema };
+```
+
+7. Modificar el archivo _**order.router.js**_ y agregar el siguiente código:
+
+```js
+router.post(
+  "/add-item",
+  validatorHandler(addItemSchema, "body"),
+  async (req, res, next) => {
+    try {
+      const body = req.body;
+      const newItem = await service.addItem(body);
+      res.status(201).json(newItem);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+```
+
+8. Modificar el archivo _**order.service.js**_ y agregar lo siguiente:
+
+```js
+ async addItem(data) {
+    /* Se ejecuta el método "create" de la tabla clase "Order". Se puede acceder directamente al modelo "Order" porque anteriormente se importo el objeto "models".
+
+    Se desea usar la función "create" con los datos que se encuentran dentro del objeto "order", el cual fue creado en el archivo "order.schema.js" dentro de la constante "createOrderSchema".
+
+    */
+    const newItem = await models.OrderProduct.create(data);
+    return newItem;
+  }
+```

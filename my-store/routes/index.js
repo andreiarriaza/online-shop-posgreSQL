@@ -1,9 +1,12 @@
 const express = require('express');
 /* Se importa el archivo que contiene las rutas relacionadas con los productos. */
 
+/* Se importan los archivos "router" que corresponde a cada sección del sitio web, los cuales serán asociados a un endpoint específico. */
 const productsRouter = require('./products.router.js');
 const categoriesRouter = require('./categories.router.js');
 const usersRouter = require('./users.router.js');
+const orderRouter = require('./orders.router');
+const customersRouter = require('./customers.router.js');
 // const orderRouter = require('./orders.router.js');
 // const customersRouter = require('./customers.router.js');
 
@@ -35,16 +38,24 @@ function routerApi(app) {
   app.use('/api/v1', router);
 
   /* Se define la ruta que será asignada a "productsRouter", el cual hace referencia al módulo "router" que se exportó
-  desde el archivo "productsRouter.js". */
+  desde el archivo "products.router.js". */
   router.use('/products', productsRouter);
 
   /* Se define la ruta que será asignada a "usersRouter", el cual hace referencia al módulo "router" que se exportó
-  desde el archivo "usersRouter.js". */
+  desde el archivo "users.router.js". */
   router.use('/users', usersRouter);
 
   /* Se define la ruta que será asignada a "categoriesRouter", el cual hace referencia al módulo "router" que se exportó
-  desde el archivo "categoriresRouter.js". */
+  desde el archivo "categories.router.js". */
   router.use('/categories', categoriesRouter);
+
+  /* Se define la ruta que será asignada a "ordersRouter", el cual hace referencia al módulo "router" que se exportó
+  desde el archivo "orders.router.js". */
+  router.use('/orders', orderRouter);
+
+  /* Se define la ruta que será asignada a "customerRouter", el cual hace referencia al módulo "router" que se exportó
+  desde el archivo "customers.router.js". */
+  router.use('/customers', customersRouter);
 }
 
 module.exports = routerApi;

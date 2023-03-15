@@ -24,7 +24,7 @@ Para instalarlo, se debe escribir lo siguiente en consola:
     npm i @hapi/boom
 */
 
-import Boom from '@hapi/boom';
+const boom = require('@hapi/boom');
 
 /* Para realizar la validación con la libería "Joi" (ver archivo "productSchema.js"),
 es necesario crear un Middleware dinámico, por lo cual, este recibe como parámetros:
@@ -55,7 +55,7 @@ function validatorHandler(schema, property) {
     if (error) {
       /* El tipo de error de la libería "Boom" llamado "badRequest()" indica que hubo un error en la petición. */
       /* Se envía el error a los middleware de error (que se encuentra en el archivo "errorHandler.js") mediante la función "next()". */
-      next(Boom.badRequest(error));
+      next(boom.badRequest(error));
     }
     /* Si no hubiese ningún error, simplemente se ejecuta la función "next()" que hará que la aplicación siga su ejecución normal. */
     next();

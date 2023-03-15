@@ -42,13 +42,14 @@ Para instalarlo, se debe escribir lo siguiente en consola:
 
 const boom = require('@hapi/boom');
 
+/* Se importa los modelos de "sequelize". */
+const { models } = require('../libs/sequelize');
+
 /*
 IMPORTANTE: no es necesario importar el archivo "postgres.pool.js", porque el "pool"
 fue incluido dentro del ORM llamado "Sequelize" (ver la sección "Qué es ORM" del archivo README.md).
 */
 // import pool from '../libs/postgres.pool.js';
-
-const sequelize = require('../libs/sequelize.js');
 
 class ProductsService {
   constructor() {
@@ -119,24 +120,34 @@ IMPORTANTE: no es necesario usar los siguientes comandos "pool", porque este ya 
     }
   }
 
-  /* Se realiza una petición "asíncrona". */
+  /* La función "create" se encarga de crear (insertar) un nuevo registro en la tabla "products". */
   async create(data) {
-    const newProduct = {
-      /* El método "uuid()" permite obtener un string ÚNICO largo que se genera de forma aleatoria, el cual
+    /* Algunas líneas de código se dejaron comentadas, porque dichas líneas sirvieron solo provisionalmente, con una API falsa nada más.
+
+    */
+
+    //const newProduct = {
+    /* El método "uuid()" permite obtener un string ÚNICO largo que se genera de forma aleatoria, el cual
         se convertirá en el "id". Se indica que la API "f" */
-      id: faker.datatype.uuid(),
-      /* Se utiliza el Spread Operator (...) para concatenar junto con el id, lo que se encuentre dentro del parámetro "data",
+    // id: faker.datatype.uuid(),
+    /* Se utiliza el Spread Operator (...) para concatenar junto con el id, lo que se encuentre dentro del parámetro "data",
       el cual es recibido por el método "create(data)".  */
-      ...data,
-    };
+    // ...data,
+    // };
     /* Se envía, mediante el método "push", los datos del nuevo producto al arreglo "products". */
-    this.products.push(newProduct);
+    // this.products.push(newProduct);
     /* Se retorna los datos del nuevo producto agregado.  */
+    // return newProduct;
+
+    const newProduct = await models.Product.create(data);
     return newProduct;
   }
 
   async find() {
-    const query = 'SELECT * FROM tasks';
+    /* Algunas líneas de código se dejaron comentadas, porque dichas líneas sirvieron solo provisionalmente, con una API falsa nada más.
+
+    */
+    // const query = 'SELECT * FROM tasks';
 
     /* Esta línea:
           const query = 'SELECT * FROM tasks';
@@ -155,11 +166,18 @@ IMPORTANTE: no es necesario usar los siguientes comandos "pool", porque este ya 
 
     Debido a que este procedimiento se debe realizar de forma asíncrona, se agrega el comando "await".
     */
-    /*
-IMPORTANTE: no es necesario usar el siguiente comando "pool", porque este ya fue incluido dentro del ORM llamado "Sequelize" (ver la sección "Qué es ORM" del archivo README.md).
-*/
 
-    const [data /*, metadata*/] = await sequelize.query(query);
+    // const [data /*, metadata*/] = await sequelize.query(query);
+
+    /* La función "findAll()" devolverá todos los datos que correspondan a una tabla específica. */
+    /* Con solo incluir el alias (category), el cual se asignó cuando se creó la asociación (relación) entre la tabla "categories" y la tabla "products", dentro del archivo "product.model.js", en la sección donde se declaró el método estático "associate()", sequelize reconocerá que los datos que se envíen desde el endpoint "customers" (http://localhost:3000/api/v1/products/) también incluirán los datos que deben ser insertados en la tabla "categories". Esto se consigue agregando el comando:
+
+          include: ['category'],
+    */
+    const products = await models.Product.findAll({
+      include: ['category'],
+    });
+
     /* El ORM llamado Sequelize, devuelve un arreglo con los siguientes elementos:
       - data: los datos que correspondan a la consulta ejecutada.
       - metadata: devuelve información más detallada de los datos, por ejemplo: sentencia SQL ejecutada (command), número de filas que conforman la tabla (rowCount), etc.
@@ -169,7 +187,7 @@ IMPORTANTE: no es necesario usar el siguiente comando "pool", porque este ya fue
           const [data, metadata] = await sequelize.query(query);
     */
     return {
-      data,
+      products,
       // metadata,
     };
   }

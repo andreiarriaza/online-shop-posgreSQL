@@ -1,47 +1,81 @@
-import express from 'express';
+const express = require('express');
+
+const CategoryService = require('../services/category.service.js');
+const validatorHandler = require('../middlewares/validator.handler.js');
+const {
+  createCategorySchema,
+  updateCategorySchema,
+  getCategorySchema,
+} = require('../schemas/category.schema.js');
 
 const router = express.Router();
+const service = new CategoryService();
 
-/* En este ejemplo, como se asignaron dos atributos  dentro del objeto JSON (categoryId y productId),
-
-si se escribe la siguiente ruta:
-    localhost:3000/categories/1/products/1000
-
-Se mostraría el siguiente objeto JSON:
-    {
-    "categoryId": "1",
-    "productId": "1000"
-    }
-
-    */
-/* Se debe recordar que el archivo "categoriesRouter.js" se invoca en el archivo "routes/index.js",
-mediante la siguiente línea de código:
-        router.use('/categories', categoriesRouter);
-
-Tomando en cuenta lo anterior, cuando en el presente archivo (categoriesRouter.js) se crea
-el método "router.get('/:categoryId/products/:productId'...)  como se devolverán los atributos "categoryId" y "productId" como respuesta "res"
-de la petición, si se escribe la siguiente ruta:
-
-     localhost:3000/categories/1/products/1000
-
-Se mostraría el siguiente objeto JSON:
-    {
-    "categoryId": "1",
-    "productId": "1000"
-    }
-
-*/
-router.get('/:categoryId/products/:productId', (req, res) => {
-  /* Como "categoryId" y "productId" son parámetros normales (y no parámetros query), se usa la propiedad "req.params" para desestructurarlos. */
-  const { categoryId, productId } = req.params;
-
-  /* El método "json()" convierte un objeto JSON en un objeto JavaScript. A pesar de su nombre,
-  este método no convierte un objeto en JSON, sino que convierte un objeto JSON en objeto JavaScript. */
-  res.json({
-    categoryId,
-    productId,
-  });
+router.get('/', async (req, res, next) => {
+  try {
+    const categories = await service.find();
+    res.json(categories);
+  } catch (error) {
+    next(error);
+  }
 });
 
-/* Se exporta la constante "router" como un módulo. */
-export default router;
+router.get(
+  '/:id',
+  validatorHandler(getCategorySchema, 'params'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const category = await service.findOne(id);
+      res.json(category);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  '/',
+  validatorHandler(createCategorySchema, 'body'),
+  async (req, res, next) => {
+    try {
+      const body = req.body;
+      const newCategory = await service.create(body);
+      res.status(201).json(newCategory);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.patch(
+  '/:id',
+  validatorHandler(getCategorySchema, 'params'),
+  validatorHandler(updateCategorySchema, 'body'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const body = req.body;
+      const category = await service.update(id, body);
+      res.json(category);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.delete(
+  '/:id',
+  validatorHandler(getCategorySchema, 'params'),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      await service.delete(id);
+      res.status(201).json({ id });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+module.exports = router;

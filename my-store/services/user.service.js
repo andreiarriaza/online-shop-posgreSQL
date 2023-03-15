@@ -24,6 +24,7 @@ const boom = require('@hapi/boom');
 class UserService {
   constructor() {}
 
+  /* La función "create" se encarga de crear (insertar) un nuevo registro en la tabla "users". */
   async create(data) {
     /* Para realizar peticiones mediante POSTMAN, se deben seguir los siguientes pasos:
       1. Tipo de petición: POST
@@ -50,9 +51,9 @@ class UserService {
 
     La constante "newUser" almacenará los datos del usuario que se insertará en la base de datos.
 
-    Se accede al modelo "User", el cual fue importado en este archivo, y que fue creado en el archivo "user.service.js". .
+    Se accede al modelo "User", el cual fue importado en este archivo, y que fue creado en el archivo "user.model.js". .
 
-    El método "create()" forma parte de la librería "Sequelize" y se encarga de insertar campos en una tabla de la base de datos, en este caso, en la tabla "users". Dicha tabla fue creada en el mismo archivo dentro del cual se creó el modelo llamado "User", es decir, en el archivo "user.model.js".
+    El método "create()" forma parte de la librería "Sequelize" y se encarga de insertar campos en una tabla de la base de datos, en este caso, en la tabla "USER_TABLE". Dicha tabla fue creada en el mismo archivo dentro del cual se creó el modelo llamado "User", es decir, en el archivo "user.model.js".
 
     Debido a que este procedimiento se debe realizar de forma asíncrona, se agrega el comando "await".
     */
@@ -83,7 +84,24 @@ class UserService {
 
     Debido a que este procedimiento se debe realizar de forma asíncrona, se agrega el comando "await".
     */
-    const response = await models.User.findAll();
+    /*
+    En el archivo "user.model.js" se agregó la siguiente línea de código:
+
+      this.hasOne(models.Customer, {
+      as: 'customer',
+      foreignKey: 'userId',
+    });
+
+    Como allí se explicó, esta permite crear la relación entre la tabla "users" y la tabla "customers". Y también se indicó que el atributo "as" sirve para definir un alias que represente a la relación que se está estableciendo. En este caso, la relación creada entre la tabla "users" y la tabla "customers", tendrá asignado el alias: "customer".
+
+    Ahora bien, se desea que cuando se acceda al endoint de "customer": http://localhost:3000/api/v1/customers/ en la API, se muestre la información respectiva de la tabla "users", pero también se desea que se muestre la información que corresponde a la tabla "customers", de forma anidada. Para conseguir esto se agrega el siguiente comando:
+
+        include: ['customer']
+
+    */
+    const response = await models.User.findAll({
+      include: ['customer'],
+    });
     /* La propiedad "rows" retorna el número de filas que hay dentro de los datos de la tabla "tasks" obtenidos como respuesta.  */
     return response;
   }
@@ -170,7 +188,7 @@ class UserService {
     Simplemente se invoca nuevamente la función "findOne()" que fue creada arriba en este mismo archivo.
     */
     const user = await this.findOne(id);
-    /*  El método "update" forma parte de la librería "Sequelize" y actualizará el registro que se desea modificar, el cual se encuentra almacenado en la constante "user", con los cambios enviados por medio del parámetro "changes". Luego de esperar (await) la respuesta de esta promesa, los resultados s e almacenarán en la constante "response". */
+    /*  El método "update" forma parte de la librería "Sequelize" y actualizará el registro que se desea modificar, el cual se encuentra almacenado en la constante "user", con los cambios enviados por medio del parámetro "changes". Luego de esperar (await) la respuesta de esta promesa, los resultados se almacenarán en la constante "response". */
 
     /* IMPORTANTE: tanto con el método "update", como con el método "destroy" de la librería "Sequelize", es indispensable enviar también el atributo "where" con el id del elemento que se quiere actualizar o eliminar. */
     await user.update(changes, { where: { id } });
