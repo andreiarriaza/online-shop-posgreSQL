@@ -35,7 +35,7 @@ const name = Joi.string().min(3).max(15);
     - Acepta números enteros.
     - Valor mínimo: 10 (esto significa que el precio más bajo aceptado es "10").
   */
-const price = Joi.number().strict().integer().min(10);
+const price = Joi.number().integer().min(10);
 
 /*
 También se agregará el campo "description", el cual contendrá la descripción de cada producto, el cual será de tipo "string" y tendrá una longitud mínima de 10 caracteres.
@@ -52,6 +52,35 @@ const image =
   Joi.string().uri(); /* El nombre del método "uri()" es correcto. */
 
 const categoryId = Joi.number().integer();
+
+/* Estas dos constantes servirán para filtrar los productos con base en un precio mínimo y un máximo.*/
+const price_min = Joi.number().integer().min(10);
+const price_max = Joi.number().integer().min(10);
+
+/* Estas constantes servirán para controlar la paginación. */
+/*
+
+El comando _**limit**_ permite especificar la cantidad de elementos que se desea mostrar. Si se le asignara un valor de **10**, solamente 10 elementos se mostrarían en el sitio web.
+
+Por otra parte el _**offset**_ es como un apuntador, para indicar el primer registro que se quiere devolver.
+
+Ejemplo 1:
+Suponiendo que se tengan los siguiente elementos:
+1 2 3 4 5 6
+
+Si se asignará un valor de _**offset**_ igual a "0" y un _**limit**_ igual a "2", se mostrarían únicmante los registros **1 y 2** de la base de datos, porque se mostrarían
+"2" elementos a partir del elemento al que le corresponde el índice "0".
+
+Ejemplo 2:
+Suponiendo que se tengan los siguiente elementos:
+1 2 3 4 5 6
+
+Si se asignará un valor de _**offset**_ igual a "2" y un _**limit**_ igual a "2", se mostrarían únicmante los registros **3 y 4** de la base de datos, porque se mostrarían
+"2" elementos a partir del elemento al que le corresponde el índice "2".
+
+*/
+const limit = Joi.number().integer();
+const offset = Joi.number().integer();
 
 /* Creación de Schema para la "creación" */
 
@@ -83,6 +112,43 @@ const getProductSchema = Joi.object({
   id: id.required(),
 });
 
-module.exports = { createProductSchema, updateProductSchema, getProductSchema };
+/* Creación de Schema para la paginación de la aplicación */
+/*  Los parámetros "price", "limit" y "offset" son parámetro de tipo "query" (enviados por medio de la URL), por lo tanto, son opcionales, no es necesario agregar el método "require()". */
+/* (*/
+const queryProductSchema = Joi.object({
+  limit,
+  offset,
+  price,
+  price_min,
+  /*
+  Al atributo "price_max" se le agregará una validación, la cual consite en lo siguiente:
+    El atributo "price_max" erá obligatorio, si y solo sí, el atributo "price_min" fue enviado también.
+
+    Esto se consigue mediante la librería Joi. Ejecutando un condicional mediante el método "when", dentro del cual se indica
+    el atributo (price_min) que será tomado como referencia para verificar si cumple la condición.
+
+    La condición se define por medio del comando "is", dentro del cual se comprobará si el atributo "price_min" es un número entero (Joi.number().integer()) y además,
+    se verifica si dicho número realmente fue enviado, y esto se consigue mediante el método "require()":  Joi.number().integer()
+
+    Si la condición se cumple, se realizará lo que se encuentra definido dentro del atributo "then". En este caso,
+    si se comprueba que existe el atributo "price_min" y que este es un número entero, entonces (then) se
+    definirá que el atributo "price_max" debe ser obligatorio (Joi.required).
+
+
+
+
+  */
+  price_max: price_max.when('price_min', {
+    is: Joi.number().integer().required(),
+    then: Joi.required(),
+  }),
+});
+
+module.exports = {
+  createProductSchema,
+  updateProductSchema,
+  getProductSchema,
+  queryProductSchema,
+};
 
 /* IMPORTANTE: para realizar la validación, se creó el Middleware llamado: "validatorHandler.js"*/

@@ -11,7 +11,8 @@ const {
   createProductSchema,
   updateProductSchema,
   getProductSchema,
-} = require('../schemas/product.schema');
+  queryProductSchema,
+} = require('../schemas/product.schema.js');
 
 const router = express.Router();
 
@@ -26,49 +27,134 @@ Tomando en cuenta lo anterior, cuando en el presente archivo (productsRouter.js)
 el método "router.get('/'...) que está a continuación, la diagonal sirve
 para indicar que ese método se ejecutará cuando se acceda a la ruta raíz (/) del archivo "productsRouter.js" mediante el método GET.
 
-Dicha ruta raíz equivale al endpoint:
+Dicha ruta raíz equivale al endpoint (primer endpoint de productos):
      localhost:3000/api/v1/products
 
 */
-router.get('/', async (req, res) => {
-  /* También es posible enviar objetos JSON al servidor.
-  En este caso, se envía un arreglo, el cual contiene
-  diferentes objetos JSON. */
+/* El endpoint  (segundo enpoint de productos) para probar la paginación de la aplicación, enviándole los parámetros de tipo "query" llamados: limit y offset,
+es el siguiente:
 
-  /* Se accede al método "find" de la instancia de servicio llamada "service", es decir, se acede al método "find()" del
-  archivo de servicio llamado "productService.js". Con esto, se obtienenen los productos, los cuales se almacenan dentro de la constante "products".  */
-  const products = await service.find();
 
-  /*
-
-Parámetros query
-
-Son parámetros de consulta que suelen venir en los métodos de consulta o métodos GET.
-
-Son los que se utilizan, por ejemplo,
-para controlar la paginación de un sitio web, y
-poder mostrar los productos de la página 1, o los
-productos de la página 2, etc.
-
-La mayoría de veces se utilizan para filtrar determinados registros, para que solo sean mostrados algunos productos en específico.
-*/
-  /*
- Para poder capturar los parámetros de tipo "query", se utiliza la propiedad "req.query".
-
-  Ejemplo:
-    const { size } = req.query;
-
+http://localhost:3000/api/v1/products/?limit=5&offset=0
 */
 
-  /* Se utiliza un operador de cortocircuito para comprobar si el usuario envió el parámetro query (el cual es opcional),
-  o bien, si no lo envió.
+/*
+Otro endpoint (tercer enpoint de productos), que se puede utilizar para mostrar únicamente determinados precios en la
+aplicación, es el siguiente:
 
-  Si el parámetro query llamado "size" fue enviado, es decir, si existe, será almacenado en la variable "limit".
-  De lo contrario, si dicho parámetro no fue enviado, en la variable "limit" se almacenará el valor "10".
+    http://localhost:3000/api/v1/products?price=60
+*/
+
+/*
+El cuarto endpoint que es posible utilizar para consultar productos, es el siguiente:
+
+http://localhost:3000/api/v1/products?price_min=10&price_max=60
+
+En el anterior endpoint, se filtran los productos con base en un precio mínimo y uno máximo.
+*/
+
+router.get(
+  '/',
+  /* Después de la ruta (/) se invoca la validación de datos mediante la función "validatorHandler", dentro de la cual
+se envían dos parámetros:
+    - Primer parámetro: en este, se especifica qué tipo de Schema se quiere validar, en este caso, el schema "getProductSchema".
+    - Segundo parámetro: se indica de dónde vendrá la información que se utilizará de referencia. En este caso, el valor que se requiere es el
+                         valor de "limit" y "offset", el cual es enviado por medio de la URL como parámetro (query).
+
+Si la validación es exitosa, solo entonces, se ejecuta la función asíncrona (async) que está a continuación del parámetro "validatorHandler()".
+*/
+  /*
+    req.params contiene parámetros de ruta (en la parte de la ruta de la URL), y req.query contiene los parámetros de consulta de URL (después de la ? en la URL).
+
+También puedes usar req.param(name) para buscar un parámetro en ambos lugares (así como req.body), pero este método ahora está en desuso.
+
+Supongamos que ha definido el nombre de su ruta de esta manera:
+
+https://localhost:3000/user/:userid
+que se convertirá en:
+
+https://localhost:3000/user/5896544
+Aquí, si va a imprimir:
+
+solicitud.parámetros
+
+userId : 5896544
+
+
+entonces
+
+request.params.userId = 5896544
+
+entonces solicitud.parámetros es un objeto que contiene propiedades para la ruta nombrada
+
+y solicitud.consulta proviene de los parámetros de consulta en la URL, por ejemplo:
+
+https://localhost:3000/user?userId=5896544
+
+solicitud.consulta
+
+
+
+userId: 5896544
+entonces
+
+request.query.userId = 5896544
+    */
+  validatorHandler(queryProductSchema, 'query'),
+  /* El parámetro "next" corresponde a la función "next()", la cual se encargará, en el caso de haber un error,
+    de invocar los Middlewares de error ubicados en el archivo "errorHandler.js". */
+
+  async (req, res, next) => {
+    try {
+      /* También es posible enviar objetos JSON al servidor.
+    En este caso, se envía un arreglo, el cual contiene
+    diferentes objetos JSON. */
+
+      /* Se accede al método "find" de la instancia de servicio llamada "service", es decir, se acede al método "find()" del
+    archivo de servicio llamado "productService.js". Con esto, se obtienenen los productos, los cuales se almacenan dentro de la constante "products".
+
+    Al método "find" se le envían (si los hubiera) los parámetros de tipo "query" (limit y offset) enviados por medio de la URL:
+         req.query  (en la petición, se envían todos los parámetros query enviados por medio de la URL, en este caso, dentro de "req.query" se envían los parámetros "limit" y "offset")
+
+    */
+      const products = await service.find(req.query);
+
+      /*
+
+  Parámetros query
+
+  Son parámetros de consulta que suelen venir en los métodos de consulta o métodos GET.
+
+  Son los que se utilizan, por ejemplo,
+  para controlar la paginación de un sitio web, y
+  poder mostrar los productos de la página 1, o los
+  productos de la página 2, etc.
+
+  La mayoría de veces se utilizan para filtrar determinados registros, para que solo sean mostrados algunos productos en específico.
+  */
+      /*
+   Para poder capturar los parámetros de tipo "query", se utiliza la propiedad "req.query".
+
+    Ejemplo:
+      const { size } = req.query;
+
   */
 
-  res.json(products);
-});
+      /* Se utiliza un operador de cortocircuito para comprobar si el usuario envió el parámetro query (el cual es opcional),
+    o bien, si no lo envió.
+
+    Si el parámetro query llamado "size" fue enviado, es decir, si existe, será almacenado en la variable "limit".
+    De lo contrario, si dicho parámetro no fue enviado, en la variable "limit" se almacenará el valor "10".
+    */
+
+      res.json(products);
+    } catch (err) {
+      /* En caso de detectar un error, se ejecuta la función "next()", la cual se encarga de invocar
+    los middlewares de error que fueron creados en el archivo "errorHandler.js". */
+      next(err);
+    }
+  }
+);
 
 /* ******************* Métodos ******************* */
 /*
@@ -146,6 +232,10 @@ NO SERÁ RECONOCIDA la palabra "filter" como un "id", sino que será interpretad
 /*
 Para testear esta ruta, se debe hacer una petición por método GET al siguiente endpoint:
     localhost:3000/api/v1/products/filter
+
+Esto devolverá el mensaje "Yo soy un filter".
+
+
 */
 router.get('/filter', (req, res) => {
   res.send('Yo soy un filter.');
@@ -159,7 +249,7 @@ los dos puntos (:). El parámetro que recibirá el
 endpoint en este ejemplo, es el parámetro "id" (:id). */
 
 /* En este ejemplo, como no se asignó ningún atributo "id" dentro del objeto JSON,
-cualquier número o texto que se escriba el "endpoint", será
+cualquier número o texto que se escriba en el "endpoint", será
 tomado como "id".
 
 Es decir, que si se escribiera la siguiente ruta:
@@ -186,6 +276,63 @@ Si la validación es exitosa, solo entonces, se ejecuta la función asíncrona (
 /* El parámetro "next" corresponde a la función "next()", la cual se encargará, en el caso de haber un error,
     de invocar los Middlewares de error ubicados en el archivo "errorHandler.js". */
 
+/*
+    req.params contiene parámetros de ruta (en la parte de la ruta de la URL), y req.query contiene los parámetros de consulta de URL (después de la ? en la URL).
+
+También puedes usar req.param(name) para buscar un parámetro en ambos lugares (así como req.body), pero este método ahora está en desuso.
+
+Supongamos que ha definido el nombre de su ruta de esta manera:
+
+https://localhost:3000/user/:userid
+que se convertirá en:
+
+https://localhost:3000/user/5896544
+Aquí, si va a imprimir:
+
+solicitud.parámetros
+
+userId : 5896544
+
+
+entonces
+
+request.params.userId = 5896544
+
+entonces solicitud.parámetros es un objeto que contiene propiedades para la ruta nombrada
+
+y solicitud.consulta proviene de los parámetros de consulta en la URL, por ejemplo:
+
+https://localhost:3000/user?userId=5896544
+
+solicitud.consulta
+
+
+
+userId: 5896544
+entonces
+
+request.query.userId = 5896544
+    */
+
+/*
+Endpoint para probar la ruta  '/:id':
+
+    localhost:3000/products/5
+
+
+Lo anterior, mostraría, por ejemplo, lo siguiente:
+    {
+    "id": "5",
+    "name": "Product 2",
+    "price": 2000
+    }
+
+*/
+
+/*
+  Endpoint para poder realizar la búsqueda con base en determinado "id":
+      http://localhost:3000/api/v1/products/1
+  */
 router.get(
   '/:id',
   validatorHandler(getProductSchema, 'params'),

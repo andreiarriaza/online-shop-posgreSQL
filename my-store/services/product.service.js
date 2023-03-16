@@ -32,6 +32,9 @@ Para instalarla y utilizarla se deben seguir los siguientes pasos:
             const randomName = faker.name.findName();
 */
 const { faker } = require('@faker-js/faker');
+
+/* Sequelize también proporciona un objeto llamado "Op", el cual permite utilizar operadores de Sequelize dentro de la aplicación.  */
+const { Op } = require('sequelize');
 /*
 Paquete "boom":
 El paquete "boom" permite administrar errores de la API.
@@ -143,7 +146,72 @@ IMPORTANTE: no es necesario usar los siguientes comandos "pool", porque este ya 
     return newProduct;
   }
 
-  async find() {
+  /* La función "find()" que servirá para visualizar los datos almacenados en la tabla "products", recibe el parámetro "query", el
+  cual le fuen enviado desde el archivo "products.router.js"; específicamente desde la función "get()".
+
+  El parámetro "query" es un objeto que incluye dos valores:
+  "limit" y "offset". */
+  async find(query) {
+    /* La constante "options" almacena las opciones que le serán enviadas al método "findAll()".
+
+    En este caso, se le enviarán los datos que se encuentran en la asociación "category",
+    */
+    const options = {
+      /* Con solo incluir el alias (category), el cual se asignó cuando se creó la asociación (relación) entre la tabla "categories" y la tabla "products", dentro del archivo "product.model.js", en la sección donde se declaró el método estático "associate()", sequelize devolverá, además de los datos de la tabla "products", también los datos de la tabla "categories". Esto se consigue agregando el comando:
+
+          include: ['category'],
+    */
+      include: ['category'],
+      /* Se usa el comando "where", el cual equivale a la sentencia "WHERE" de SQL.
+
+      Sequelize proporciona distintos comandos equivalentes a las distantas consultas o sentencias SQL.
+
+      Para conocer los distintos comandos, se puede acceder al siguiente link:
+        https://sequelize.org/docs/v6/core-concepts/model-querying-basics/
+      */
+      /* Se agrea un valor vacío dentro del comando "where", esto permitirá que si no se envía ningún valor dentro de él más adelante,
+      no afectará en nada a la aplicación.  */
+      where: {},
+    };
+
+    /* Se desestructuran los valores "limit" y "offset" que fueron enviados como parte del parámetro "query". */
+    const { limit, offset } = query;
+    /* Se comprueba si fueron enviados los parámetros "limit" y "offset". */
+    if (limit && offset) {
+      /* Se agrega el parámetro "limit" dentro del objeto "options", con el nombre "limit" (options.limit).  */
+      options.limit = limit;
+      /* Se agrega el parámetro "offset" dentro del objeto "options", con el nombre "offset" (options.offset).  */
+      options.offset = offset;
+    }
+    /* Se desestructura el valor "price" que también fue enviado como parte del parámetro "query".  */
+    const { price } = query;
+
+    /* Si el parámetro "price" es verdadero, es decir, si el parámetro NO está vacío,
+    se agregará el atributo "price" y se le asigna el valor del parámetro "price",
+    al objeto que se encuentra almacenado dentro del atributo "where", el cual se definió dentro
+    de la constante "options" anteriormente. */
+    if (price) {
+      options.where.price = price;
+    }
+
+    /* Se desestructuran los valores "price_min" y "price_max", los cuales también están incluidos dentro del parámetro "query". */
+    const { price_min, price_max } = query;
+
+    /* Si el parámetro "price" es verdadero, es decir, si el parámetro NO está vacío,
+    se agregará el atributo "price" y se le asigna el valor del parámetro "price",
+    al objeto que se encuentra almacenado dentro del atributo "where", el cual se definió dentro
+    de la constante "options" anteriormente. */
+    if (price_min && price_max) {
+      /* Sequelize también proporciona un objeto llamado "Op", el cual permite utilizar operadores de Sequelize dentro de la aplicación.
+      Este objeto fue importado al inicio de este archivo. */
+      options.where.price = {
+        /* El operador "Op.gte" equivale al operador "mayor o igual que". En este caso, se desea que sea mayor o igual al precio mínimo. */
+        [Op.gte]: price_min,
+        /* El operador "Op.lte" equivale al operador "menor o igual que". En este caso, se desea que sea menor o igual al precio máximo. */
+        [Op.lte]: price_max,
+      };
+    }
+
     /* Algunas líneas de código se dejaron comentadas, porque dichas líneas sirvieron solo provisionalmente, con una API falsa nada más.
 
     */
@@ -170,13 +238,12 @@ IMPORTANTE: no es necesario usar los siguientes comandos "pool", porque este ya 
     // const [data /*, metadata*/] = await sequelize.query(query);
 
     /* La función "findAll()" devolverá todos los datos que correspondan a una tabla específica. */
-    /* Con solo incluir el alias (category), el cual se asignó cuando se creó la asociación (relación) entre la tabla "categories" y la tabla "products", dentro del archivo "product.model.js", en la sección donde se declaró el método estático "associate()", sequelize reconocerá que los datos que se envíen desde el endpoint "customers" (http://localhost:3000/api/v1/products/) también incluirán los datos que deben ser insertados en la tabla "categories". Esto se consigue agregando el comando:
+
+    /* Con solo incluir el alias (category), el cual se asignó cuando se creó la asociación (relación) entre la tabla "categories" y la tabla "products", dentro del archivo "product.model.js", en la sección donde se declaró el método estático "associate()", sequelize devolverá, además de los datos de la tabla "products", también los datos de la tabla "categories". Esto se consigue agregando el comando:
 
           include: ['category'],
     */
-    const products = await models.Product.findAll({
-      include: ['category'],
-    });
+    const products = await models.Product.findAll(options);
 
     /* El ORM llamado Sequelize, devuelve un arreglo con los siguientes elementos:
       - data: los datos que correspondan a la consulta ejecutada.
@@ -194,6 +261,10 @@ IMPORTANTE: no es necesario usar los siguientes comandos "pool", porque este ya 
 
   /* Petición asíncrona para buscar un producto determinado a partir de su "id". */
 
+  /*
+  Endpoint para poder realizar la búsqueda con base en determinado "id":
+      http://localhost:3000/api/v1/products/1
+  */
   async findOne(id) {
     // Para comprobar la generación del error de los Middlewares de errores.
     //  Si se quisiera comprobar el funcionamiento de los middlewares para errores, se puede agregar la línea que está a continuación.
@@ -203,7 +274,7 @@ IMPORTANTE: no es necesario usar los siguientes comandos "pool", porque este ya 
     como parámetro a la función "findOne()". La función "find" buscará el "id" que coincida dentro del arreglo "products" y lo devolverá, en caso
     sea encontrado. Si el "id" es encontrado, la constante "product" será VERDADERA. Pero si el "id" no es encontrado, la constante "product"
     tendrá el valor "FALSE". */
-    const product = this.products.find((item) => item.id === id);
+    const product = models.Product.findByPk(id);
 
     if (!product) {
       // Se lanza un error mediante el comando "throw", por medio del paquete "boom".
