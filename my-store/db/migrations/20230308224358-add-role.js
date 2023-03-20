@@ -1,6 +1,8 @@
 'use strict';
 
-const { UserSchema, USER_TABLE } = require('../models/user.model');
+const { DataTypes } = require('sequelize');
+
+const { USER_TABLE } = require('../models/user.model');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -19,10 +21,14 @@ module.exports = {
       - Segundo parámetro: nombre de la columna que se agregará. Dicha columna se llama,
                            en este caso, "role".
       - Tercer parámetro: el esquema que va a tener la nueva columna. En este caso, el
-                          esquema del campo "role", se encuentra en el campo "role"de la constante "UserSchema", la cual se importó desde el archivo "user.model.js".
+                          esquema del campo "role", se especifican las características que tendrá el campo "role".
 
     */
-    await queryInterface.addColumn(USER_TABLE, 'role', UserSchema.role);
+    await queryInterface.addColumn(USER_TABLE, 'role', {
+      alowNull: false,
+      type: DataTypes.STRING,
+      defaultValue: 'customer',
+    });
   },
 
   async down(queryInterface /*, Sequelize*/) {

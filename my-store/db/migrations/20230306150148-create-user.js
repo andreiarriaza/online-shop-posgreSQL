@@ -1,7 +1,11 @@
 'use strict';
 
+/* Se importan las utilidades "DataTypes" y "Sequelize"
+que forman parte del ORM llamado Sequelize. */
+const { DataTypes, Sequelize } = require('sequelize');
+
 /*   Se importa, desde el archivo "user.model.js" las constantes "UserSchema" y "USER_TABLE". */
-const { UserSchema, USER_TABLE } = require('./../models/user.model.js');
+const { USER_TABLE } = require('./../models/user.model.js');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -31,7 +35,38 @@ module.exports = {
       - USER_TABLE: esta constante fue creada en el archivo "user.model.js" y contiene el nombre de la tabla que se creará.
       - UserSchema: contiene la estructura o esquema de la tabla que se va a crear. Dicho esquema también fue definido dentro del archivo "user.model.js". */
 
-    await queryInterface.createTable(USER_TABLE, UserSchema);
+    await queryInterface.createTable(USER_TABLE, {
+      id: {
+        /* Sirve para indicar si se permite (true) o no (false) que haya campos registros
+    nulos en dicho campo. */
+        allowNull: false,
+        /* Se define si se desea que el campo sea autoincrementable. */
+        autoIncrement: true,
+        /* Se indica si el campo es o no una llave primaria. */
+        primaryKey: true,
+        /* Se define qué tipo de dato es el apropiado para el campo en cuestión. En este caso, un entero (INTEGER). */
+        type: DataTypes.INTEGER,
+      },
+      email: {
+        allowNull: false,
+        type: DataTypes.STRING,
+        /* Este campo evita que hayan registros duplicados, evitando que haya dos valores iguales. */
+        unique: true,
+      },
+      password: {
+        allowNull: false,
+        type: DataTypes.STRING,
+      },
+
+      createdAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+        /* El nombre real del campo es "create_at". El nombre del atributo "createdAt" que está unas líneas arriba, es el nombre con el que dicho campo se manipulará en JavaScript. */
+        field: 'create_at',
+        /* Se define que el valor predeterminado de este campo, será la fecha actual. */
+        defaultValue: Sequelize.NOW,
+      },
+    });
   },
 
   /* La función "down()" permite que sea posible revertir cambios dentro de la aplicación. */

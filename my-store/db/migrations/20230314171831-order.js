@@ -1,6 +1,11 @@
 'use strict';
 
-const { OrderSchema, ORDER_TABLE } = require('./../models/order.model.js');
+const { ORDER_TABLE } = require('./../models/order.model.js');
+const { CUSTOMER_TABLE } = require('./../models/customer.model.js');
+
+/* Se importan las utilidades "DataTypes" y "Sequelize"
+que forman parte del ORM llamado Sequelize. */
+const { DataTypes, Sequelize } = require('sequelize');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -18,7 +23,33 @@ module.exports = {
     El método "createTable()" recibe dos parámetros:
       - ORDER_TABLE: esta constante fue creada en el archivo "order.model.js" y contiene el nombre de la tabla que se creará.
       - OrderSchema: contiene la estructura o esquema de la tabla que se va a crear. Dicho esquema también fue definido dentro del archivo "order.model.js". */
-    await queryInterface.createTable(ORDER_TABLE, OrderSchema);
+    await queryInterface.createTable(ORDER_TABLE, {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: DataTypes.INTEGER,
+      },
+      /* El campo "customerId" es el que servirá para establecer la relación de la tabla "ORDER_TABLE" con la tabla "CUSTOMER_TABLE". */
+      customerId: {
+        field: 'customer_id',
+        allowNull: false,
+        type: DataTypes.INTEGER,
+        /*El atributo references, sirve para definir cuál será la llave primaria con la que irá relacionado el campo "customerId". En este caso, la llave primaria se encuentra dentro de la tabla "CUSTOMER_TABLE", y el campo tiene tiene asignado el nombre "id".  */
+        references: {
+          model: CUSTOMER_TABLE,
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+      },
+      createdAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+        field: 'created_at',
+        defaultValue: Sequelize.NOW,
+      },
+    });
   },
 
   async down(queryInterface /*, Sequelize*/) {
