@@ -138,18 +138,16 @@ Al crear la instancia se le envían los siguientes parámetros:
 ,
 
 */
-const sequelize = new Sequelize(config.dbUrl, {
-  dialect: 'postgres',
-  /* De forma predeterminada, el atributo "logging", tiene asignado el valor "console.log", por eso se dejó comentada esa línea. */
-  /*logging: console.log,*/
 
-  /* ¡¡¡IMPORTANTE!!!: si se deseara utilizar el sistema de gestión de bases de datos "MySQL", el atributo "dialect" debería quedar como se muestra a continuación.
+/* Si la variable "isProd" es verdadera, el atributo "logging" tendrá asignado el valor "false", de lo contrario, el atributo "logging" tendrá el valor "true". */
+const options = { dialect: 'postgres', logging: config.isProd ? false : true };
 
-        dialect: 'mysql',
-  */
-
-  // dialect: 'mysql',
-});
+if (config.isProd) {
+  options.ssl = {
+    rejectUnauthorized: false,
+  };
+}
+const sequelize = new Sequelize(config.dbUrl, options);
 
 /* La función "setupModels()" fue creada en el archivo "db/models/index.js"; y recibe
 como parámetros la conexión que se almacena en la constante "sequelize".
