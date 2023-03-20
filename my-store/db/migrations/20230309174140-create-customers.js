@@ -4,9 +4,9 @@
 que forman parte del ORM llamado Sequelize. */
 const { DataTypes, Sequelize } = require('sequelize');
 /*   Se importa, desde el archivo "customer.model.js" las constantes "CustomerSchema" y "CUSTOMER_TABLE". */
-const { CUSTOMER_TABLE } = require('./../models/customer.model.js');
+const { CUSTOMER_TABLE } = require('../models/customer.model.js');
 
-const { USER_TABLE } = require('./user.model');
+const { USER_TABLE } = require('../models/user.model.js');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {

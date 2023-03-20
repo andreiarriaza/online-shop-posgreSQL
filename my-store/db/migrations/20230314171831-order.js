@@ -1,7 +1,7 @@
 'use strict';
 
-const { ORDER_TABLE } = require('./../models/order.model.js');
-const { CUSTOMER_TABLE } = require('./../models/customer.model.js');
+const { ORDER_TABLE } = require('../models/order.model.js');
+const { CUSTOMER_TABLE } = require('../models/customer.model.js');
 
 /* Se importan las utilidades "DataTypes" y "Sequelize"
 que forman parte del ORM llamado Sequelize. */

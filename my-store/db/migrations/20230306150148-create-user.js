@@ -5,7 +5,7 @@ que forman parte del ORM llamado Sequelize. */
 const { DataTypes, Sequelize } = require('sequelize');
 
 /*   Se importa, desde el archivo "user.model.js" las constantes "UserSchema" y "USER_TABLE". */
-const { USER_TABLE } = require('./../models/user.model.js');
+const { USER_TABLE } = require('../models/user.model.js');
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
