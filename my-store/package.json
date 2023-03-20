@@ -34,6 +34,8 @@
     "mysql2": "^3.2.0",
     "pg": "^8.9.0",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.29.0"
+    "railway": "^2.0.17",
+    "sequelize": "^6.29.0",
+    "sequelize-cli": "^6.6.0"
   }
 }
