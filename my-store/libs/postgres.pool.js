@@ -15,24 +15,31 @@ Cualquier cosa que excepcionalmente identifique un recurso es su URI como id, no
 
 */
 
-/* ***** Las variables de entorno "dbUser" y "dbPassword" se consideran delicadas, por lo tanto serán codificadas o protegidas. ***** */
+let URI = '';
 
-/* Se codifica la variable de entorno "dbUser". */
-const USER = encodeURIComponent(config.dbUser);
-/* Se codifica la variable de entorno "dbPassword". */
-const PASSWORD = encodeURIComponent(config.dbPassword);
+/* Se verifica si la variable "isProd" es verdadera. Esta variable fue creada en el archivo ".env", el cual está enlazado con el archivo "config.js". Dicha variable será verdadera cuando el entorno sea el de "producción" (production). */
+if (config.isProd) {
+  /* Si la variable "isProd" es verdaera, se asigna como URL de conexión, la variable "dbUrl" del archivo "config.js". */
+  URI = config.dbUrl;
+} else {
+  /* ***** Las variables de entorno "dbUser" y "dbPassword" se consideran delicadas, por lo tanto serán codificadas o protegidas. ***** */
 
-/* Se comenzará a obtener la URL completa de conexión. */
+  /* Se codifica la variable de entorno "dbUser". */
+  const USER = encodeURIComponent(config.dbUser);
+  /* Se codifica la variable de entorno "dbPassword". */
+  const PASSWORD = encodeURIComponent(config.dbPassword);
 
-/* Cuando se desea conectar la aplicación a una base de datos remota, por ejemplo en Amazon, Heroku, Digital Ocean, etc., no proporcionan los datos: host, port, user, password, database de forma directa, sino que proporcionan una URL de Conexión.
+  /* Se comenzará a obtener la URL completa de conexión. */
+
+  /* Cuando se desea conectar la aplicación a una base de datos remota, por ejemplo en Amazon, Heroku, Digital Ocean, etc., no proporcionan los datos: host, port, user, password, database de forma directa, sino que proporcionan una URL de Conexión.
 
 En este ejemplo, a continuación se conformará una URL de Conexión.
 */
 
-/* La constante "URI" almacenará la "URL de Conexión". */
+  /* La constante "URI" almacenará la "URL de Conexión". */
 
-/* ************ URL de Conexión ************ */
-/* La URL de Conexión tiene las siguientes partes:
+  /* ************ URL de Conexión ************ */
+  /* La URL de Conexión tiene las siguientes partes:
       - postgres://  Es el protocolo con el que se conectará a PostgresSQL
       - USER: es el usuario que se codificó anteriormente.
       - PASSWORD: el password que se configuró anteriormente.
@@ -40,7 +47,8 @@ En este ejemplo, a continuación se conformará una URL de Conexión.
       - dbPort: la variable de entorno "dbPort" que fue creada en el archivo "config.js".
       - dbName: la variable de entorno "dbName" que fue creada en el archivo "config.js".
 */
-const URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+  URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
+}
 
 /*
 Para realizar la conexión con la base de datos, se crea una instancia

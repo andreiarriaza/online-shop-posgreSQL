@@ -116,32 +116,6 @@ Cualquier cosa que excepcionalmente identifique un recurso es su URI como id, no
 
 /* ***** Las variables de entorno "dbUser" y "dbPassword" se consideran delicadas, por lo tanto serán codificadas o protegidas. ***** */
 
-/* Se codifica la variable de entorno "dbUser". */
-const USER = encodeURIComponent(config.dbUser);
-/* Se codifica la variable de entorno "dbPassword". */
-const PASSWORD = encodeURIComponent(config.dbPassword);
-
-/* Se comenzará a obtener la URL completa de conexión. */
-
-/* Cuando se desea conectar la aplicación a una base de datos remota, por ejemplo en Amazon, Heroku, Digital Ocean, etc., no proporcionan los datos: host, port, user, password, database de forma directa, sino que proporcionan una URL de Conexión.
-
-En este ejemplo, a continuación se conformará una URL de Conexión.
-*/
-
-/* La constante "URI" almacenará la "URL de Conexión". */
-
-/* ************ URL de Conexión ************ */
-/* La URL de Conexión tiene las siguientes partes:
-      - postgres://  Es el protocolo con el que se conectará a PostgresSQL
-      - USER: es el usuario que se codificó anteriormente.
-      - PASSWORD: el password que se configuró anteriormente.
-      - dbHost: la variable de entorno "dbHost" que fue creada en el archivo "config.js".
-      - dbPort: la variable de entorno "dbPort" que fue creada en el archivo "config.js".
-      - dbName: la variable de entorno "dbName" que fue creada en el archivo "config.js".
-*/
-
-const URI = `postgres://${USER}:${PASSWORD}@${config.dbHost}:${config.dbPort}/${config.dbName}`;
-
 /*
 ¡¡¡IMPORTANTE!!!: si se trabajará con el Sistema de Gestión de Bases de Datos MySQL,
 la línea anterior debería quedar así:
@@ -164,7 +138,7 @@ Al crear la instancia se le envían los siguientes parámetros:
 ,
 
 */
-const sequelize = new Sequelize(URI, {
+const sequelize = new Sequelize(config.dbUrl, {
   dialect: 'postgres',
   /* De forma predeterminada, el atributo "logging", tiene asignado el valor "console.log", por eso se dejó comentada esa línea. */
   /*logging: console.log,*/

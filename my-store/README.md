@@ -2300,3 +2300,68 @@ module.exports = {
 En la documentación de _**Sequelize**_ se pueden revisar los comandos que permiten realizar lo equivalente a distintas sentencias _**SQL**_.
 
 El link es el siguiente: https://sequelize.org/docs/v6/core-concepts/model-querying-basics/
+
+## Subir proyecto a producción con [Raleway](https://railway.app/)
+
+Para subir un proyecto a producción, utilizando _\*Railway\*\*_, se deben seguir los siguientes pasos:
+
+1. Acceder a _**Railway**_, por medio del siguiente link: https://railway.app/
+2. Dar clic en la opción _**Dashboard**_.
+3. Seleccionar el botón _**New Proyect**_.
+4. Seleccionar la opción _**Deploy from Github repo**_. Para que esta opción sea válida, el proyecto ya debe encontrarse dentro de un repositorio en _**Github**_.
+5. Seleccionar la opción _**Configure GitHub App**_ y permitir que _\*Railway\*\*_ acceda al repositorio indicado, ya sea seleccionando la opción _**Only repositories**_ u _**Only select repositories**_.
+6. Una vez elegido el repositorio, seleccionar la opción: _**Deploy now**_.
+7. Al dar clic en el proyecto que se creó, se debe seleccionar la opción _**Variables**_. Acá, se deben agregar las variables de entorno que serán necesarias para la aplicación. Por ejemplo:
+
+```json
+
+DATABASE_URL *******
+
+DB_HOST *******
+
+DB_NAME *******
+
+DB_PASSWORD *******
+
+DB_PORT *******
+
+DB_USER *******
+
+
+
+PGDATABASE *******
+
+
+PGHOST *******
+
+PGPASSWORD *******
+
+
+PGPORT *******
+
+PGUSER *******
+
+
+
+```
+
+Estas variables son las mismas que se crearon en el archivo _**config.js**_. Los valores que se asignen a cada variable, deben ser los mismos que se asignarán cuando se cree el la base de datos _**Postgress**_, lo cual se hará a continuación.
+
+8. Dar clic derecho en un área vacía del _**Dashboard**_ y seleccionar la opción _**Add to database**_. Elegir la base de datos deseada, en este caso, se seleccionará _**Add PostgreSQL**_.
+
+9. Cuando se agregue la base de datos, dentro de la ficha _**connect**_ se encontrarán las variabales de entorno utilizadas por _**Raleway**_ que están asociadas a dicha base de datos:
+
+```json
+DATABASE_URL *******
+
+PGDATABASE *******
+
+PGHOST *******
+
+PGPASSWORD *******
+
+PGPORT *******
+
+PGUSER *******
+
+```

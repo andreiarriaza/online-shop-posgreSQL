@@ -30,6 +30,11 @@ const config = {
     se agregará será el de la derecha.
   */
   env: process.env.NODE_ENV || 'dev',
+
+  /* La variable "isProd" será verdadera, solamente si el entorno (ENV)
+  se encuentra en la fase de producción. */
+  isProd: process.env.NODE_ENV === 'production',
+
   /* Si no se detecta un puerto, se asignará de forma predeterminada el puerto "3000". */
   port: process.env.NODE_PORT || 3000,
 
@@ -47,6 +52,8 @@ const config = {
   dbName: process.env.DB_NAME,
   /* Puerto por medio del cual se conectará la base de datos. */
   dbPort: process.env.DB_PORT,
+  /* URL de conexión. */
+  dbUrl: process.env.DATABASE_URL,
 };
 
 module.exports = { config };
