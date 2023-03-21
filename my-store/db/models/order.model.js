@@ -74,7 +74,7 @@ class Order extends Model {
     this.belongsTo(models.Customer, {
       as: 'customer',
     });
-    /* Se usó el método "belongToMany" porque una orden puede estar asociada a varios productos. */
+    /* Se usó el método "belongToMany" porque una orden puede estar asociada a muchos productos. */
     this.belongsToMany(models.Product, {
       /*
       El atributo "as" sirve para definir un alias que represente a la relación que se está estableciendo. En este caso, la relación creada entre la tabla "orders" y la tabla "order-product", tendrá asignado el alias: "items". Esta relación se establece por medio del modelo que corresponde a la tabla "order-products", el cual es el modelo "OrderProduct".

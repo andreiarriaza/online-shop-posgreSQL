@@ -62,6 +62,8 @@ class Product extends Model {
   /*Dentro del método estático "associate()" se crean las relaciones deseadas.  */
   static associate(models) {
     /* Se crea una relación de tipo "belongsTo()". Esto significa que la relación se correrá desde la entidad "PRODUCT_TABLE"; estableciéndose dicha relación desde la entidad "CATEGORY_TABLE" hacia la entidad "PRODUCT_TABLE". El atributo "as" sirve para definir un alias que represente a la relación que se está estableciendo. En este caso, la relación creada entre la tabla "categories" y la tabla "products", tendrá asignado el alias: "category".
+
+    "belogsTo" indica que un producto pertenece a una categoría.
      */
     this.belongsTo(models.Category, { as: 'category' });
   }

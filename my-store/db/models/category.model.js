@@ -30,6 +30,9 @@ class Category extends Model {
   /*Dentro del método estático "associate()" se crean las relaciones deseadas.  */
   static associate(models) {
     /* Se crea una relación de tipo "hasMany()" (de uno a muchos). Esto significa una categoría puede tener MUCHOS productos. Esta relación se correrá desde la entidad "PRODUCT_TABLE"; estableciéndose dicha relación desde la entidad "CATEGORY_TABLE" hacia la entidad "PRODUCT_TABLE". El atributo "as" sirve para definir un alias que represente a la relación que se está estableciendo. En este caso, la relación creada entre la tabla "categories" y la tabla "products", tendrá asignado el alias: "products".
+
+
+    "hasMany", significa que una categoría puede tener asociados muchos productos.
      */
     this.hasMany(models.Product, {
       as: 'products',
