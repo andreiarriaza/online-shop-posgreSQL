@@ -1278,7 +1278,7 @@ Con las migraciones, puede transferir su base de datos existente a otro estado y
 
 Necesitará la interfaz de línea de comandos (CLI) de _**Sequelize**_. La CLI incluye soporte para migraciones y arranque de proyectos.
 
-## Crear Migraciones en el ORM "Sequelize" que sirvan para CREAR UNA TABLA
+## Crear y Ejecutar Migraciones en el ORM "Sequelize" que sirvan para CREAR UNA TABLA
 
 1. Instalar la librería de _**Sequelize**_ como dependencia de desarrollo, la cual permite hacer uso de la consola de Sequelize (CLI = Interfaz de Línea de Comandos): `npm i sequelize-cli --save-dev`
 2. Se debe crear un archivo de configuración llamado _**.sequelizerc**_. Y se le agregan los siguientes comandos:
@@ -1335,8 +1335,13 @@ La sección _scripts_ del archivo _**package.json**_ debe quedar así:
   },
 ```
 
-4. Ejecutar desde de la terminal el comando: `npm run migrations:generate create-user`
-   El comando `create-user` crea una migración que será utilizada para crear los usuarios de la aplicación.
+4. Ejecutar desde de la terminal el comando:
+   `npm run migrations:generate nombreMigracion`
+
+   En este ejemplo, quedaría así:
+
+   `npm run migrations:generate create-user`
+   La migración se crea con el nombre `create-user`, la cual servirá para crear las entidades de la base de datos.
 
    Al ejecutar el comando anterior se crea una nueva migración, desplegándose el siguiente mensaje de confirmación:
 
@@ -1393,7 +1398,7 @@ Este comando vaciará todas las migraciones, es decir, revierte TODAS las migrac
 8. Ejecutar el comando: `npm run migrations:run`. Este comanmdo se encargará de crear las tablas indicadas. En este caso, se creará la tabla llamada _**users**_.
 9. Si se accede a _**pgadmin**_ se comprobará que se crearon las tablas. En este caso, se creó la tabla _**users**_; sin embargo, se notará que también se creó una tabla más llamada _**SequelizeMeta**_, dicha tabla es creada por _**Sequelize**_ para almacenar el historial de las migraciones que se han realiado en la aplicación. La importancia de la tabla _**SequelizeMeta**_, es que, debido a que allí lleva el control del historial de migraciones, no va a volver a ejecutar una migración que anteriormente ya fue ejecutada. Por ejemplo, si ya se ejecutó anteriormente el comando `npm run migrations:run`, eso significa que ya fue creada la migración por medio del archivo _**20230306150148-create-user**_; dicho archivo aparecerá listado en la tabla _**SequelizeMeta**_ por lo que no volverá a ejecutarlo, aunque se vuelva a utilizar el comando `npm run migrations:run`.
 
-## Crear Migraciones en el ORM "Sequelize" que sirvan para EDITAR UNA TABLA
+## Crear y Ejecutar Migraciones en el ORM "Sequelize" que sirvan para EDITAR UNA TABLA
 
 1. Ejecutar el comando:
 
@@ -1459,6 +1464,10 @@ module.exports = {
 ```bash
 npm run migrations:run
 ```
+
+## Eliminar las migraciones creadas
+
+Ejecutar el comando: `npm run migrations:delete`. Este comando se configuró en el archivo _**package.json**_.
 
 ## Relaciones en Sequelize
 
@@ -1773,7 +1782,7 @@ npm run migrations:run
 
 ### Relaciones de Uno a Muchos
 
-Para establecer una relación de uno a muchos, _**sequelize**_ utiliza la función _**hasMany**_. Como en este ejemplo se desea crear una relación entre la tabla **categories** y **products**\_, la relación quedará en la tabla **productos**.
+Para establecer una relación de uno a muchos, _**sequelize**_ utiliza la función _**hasMany**_ y _**belongsTo**_ (desde la otra tabla). Como en este ejemplo se desea crear una relación entre la tabla **categories** y **products**\_, la relación quedará en la tabla **productos**.
 
 #### Pasos para crear las relaciones de Uno a Muchos
 
@@ -2454,10 +2463,10 @@ PGUSER ${{my_store.PGUSER}}
 railway run comando
 `
 
-        En este caso, sería:
-        ```bash
-        railway run node index.js
-        ```
+                                  En este caso, sería:
+                                  ```bash
+                                  railway run node index.js
+                                  ```
 
   **Segunda forma:** dentro de Railway hacer lo siguiente:
 
@@ -2513,3 +2522,9 @@ Esto significa que la URL que nos permitirá probar nuestra aplicación, será:
   `https://online-shop-posgresql.up.railway.app/api/v1/categories/`
 - Agregar producto:
   `https://online-shop-posgresql.up.railway.app/api/v1/products`
+
+## Carpeta "postgres_data"
+
+Esta carpeta es fundamental, pues se debe recordar que los contenedores no almacenan información cuando se cierra la sesión en _**Docker**_; por lo que, para que los datos persistan, estos se irán almacenando en la carpeta _**postgres_data**_.
+
+Para levantar el proyecto, es necesario ejecutar el comando: `node index.js`.

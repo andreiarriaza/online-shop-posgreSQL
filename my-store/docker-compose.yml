@@ -160,6 +160,6 @@ services:
       - PMA_HOST=mysql
     # Se define en qué puerto se desea que corra el entorno gráfico
     ports:
-      # Este servicio correrá en el puerto de la computadora "8080" (primer valor).
+      # Este servicio (MySQL) correrá en el puerto de la computadora "8080" (primer valor).
       # Internamente, correrá en el puerto "80" del contenedor (segundo valor).
       - 8080:80

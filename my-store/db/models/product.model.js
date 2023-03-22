@@ -4,7 +4,7 @@ const { Model, DataTypes, Sequelize } = require('sequelize');
 
 /* Se importa la constante "CATEGORY_TABLE", la cual tiene almacenado
 el nombre de la tabla con la que se desea crear la relación entre la tabla "categories" y la tabla "products".  */
-const { CATEGORY_TABLE } = require('./category.model');
+const { CATEGORY_TABLE } = require('./category.model.js');
 
 const PRODUCT_TABLE = 'products';
 

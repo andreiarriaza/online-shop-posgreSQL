@@ -24,7 +24,7 @@ class CustomerService {
 
     Como allí se explicó, esta permite crear la relación entre la tabla "customers" y la tabla "users". Y también se indicó que el atributo "as" sirve para definir un alias que represente a la relación que se está estableciendo. En este caso, la relación creada entre la tabla "customers" y la tabla "users", tendrá asignado el alias: "user".
 
-    Ahora bien, se desea que cuando se acceda al endoint de "customer": http://localhost:3000/api/v1/customers/ en la API, se muestre la información respectiva de la tabla "customers", pero también se desea que se muestre la información que corresponde a la tabla "users", de forma anidada. Para conseguir esto se agrega el siguiente comando:
+    Ahora bien, se desea que cuando se acceda al endoint de "customer": http://localhost:3000/api/v1/customers/ en la API, se muestre la información respectiva de la tabla "customers", pero también se desea que se muestre la información que corresponde a la tabla "users", de forma anidada, es decir, se incluye la relación con la tabla "users". Para conseguir esto se agrega el siguiente comando:
 
         include: ['user']
 

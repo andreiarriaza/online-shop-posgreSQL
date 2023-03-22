@@ -99,10 +99,10 @@ const { Sequelize } = require('sequelize');
 
 /* Se importa el archivo "config.js", el cual contiene las variables de entorno que,
 por seguridad, fueron creadas en él. */
-const { config } = require('./../config/config.js');
+const { config } = require('../config/config.js');
 
 /* Se importa el archivo "db/models/index.js" dentro del cual fueron configurados los modelos. */
-const setupModels = require('./../db/models/index.js');
+const setupModels = require('../db/models/index.js');
 
 /* Se sugiere proteger las variables de entorno que sean delicadas, codificándolas. Esto se logra mandando un URL con todo el esquema de conexión por medio del método "encodeURIComponent()"
 

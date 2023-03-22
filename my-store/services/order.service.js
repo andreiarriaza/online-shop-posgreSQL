@@ -38,7 +38,7 @@ class OrderService {
       /* Es posible utilizar anidaciones para incluir más de una asociación (relación) en el resultado de la búsqueda. En este caso,
        como las tablas "orders" y "customers" están relacionadas, se desea que cuando se busque una orden con base en su id, se muestre también lo siguiente:
 
-          - Los datos del cliente (customer) asociado a dicha orden, pero tambi
+          - Los datos del cliente (customer) asociado a dicha orden.
           - Los datos del usuario (user) en la misma búsqueda.
           - Los datos de la asociación "items".
        */

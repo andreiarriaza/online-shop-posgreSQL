@@ -67,7 +67,7 @@ class CategoryService {
 
     Debido a que este procedimiento se debe realizar de forma asíncrona, se agrega el comando "await".
     */
-    /* Con solo incluir el alias (products), el cual se asignó cuando se creó la asociación (relación) entre la tabla "categories" y la tabla "products", dentro del archivo "category.model.js", en la sección donde se declaró el método estático "associate()", sequelize reconocerá que los datos que se envíen desde el endpoint "customers" (http://localhost:3000/api/v1/categories/idCategoria) también incluirán los datos que deben ser insertados en la tabla "products". Esto se consigue agregando el comando:
+    /* Con solo incluir el alias (products), el cual se asignó cuando se creó la asociación (relación) entre la tabla "categories" y la tabla "products", dentro del archivo "category.model.js", en la sección donde se declaró el método estático "associate()", sequelize reconocerá que los datos que se envíen desde el endpoint "customers" (http://localhost:3000/api/v1/categories/idCategoria) también incluirán los datos que deben ser insertados en la tabla "products", es decir, se incluye los campos relacionados con la tabla productos. Esto se consigue agregando el comando:
 
           include: ['products'],
     */

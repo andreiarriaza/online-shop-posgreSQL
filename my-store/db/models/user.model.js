@@ -82,6 +82,9 @@ class User extends Model {
 
     Nuevamente, es necesario definir un alias para la relación. Dicho alias será "customer".
 
+    Como se usa el método "hasOne" se establece que la relación entre "users" y "customers" será de uno a uno, esto significa
+    que un usuario (user) está asociado con un solo cliente (customer).
+
 
     */
     this.hasOne(models.Customer, {

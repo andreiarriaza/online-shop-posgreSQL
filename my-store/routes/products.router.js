@@ -404,23 +404,27 @@ Si la validación es exitosa, solo entonces, se ejecuta la función asíncrona (
 router.post(
   '/',
   validatorHandler(createProductSchema, 'body'),
-  async (req, res) => {
-    /* La constante "body", almacenará toda la información que será enviada en formato JSON a la API por medio del método POST desde POSTMAN. */
-    /* La propiedad "req" (request), hace referencia a la petición de datos que se realizará.  */
-    const body = req.body;
-    /* Se accede al método "create" de la instancia de servicio llamada "service", es decir,
+  async (req, res, next) => {
+    try {
+      /* La constante "body", almacenará toda la información que será enviada en formato JSON a la API por medio del método POST desde POSTMAN. */
+      /* La propiedad "req" (request), hace referencia a la petición de datos que se realizará.  */
+      const body = req.body;
+      /* Se accede al método "create" de la instancia de servicio llamada "service", es decir,
     se accede al método "create()" del archivo de servicio "productService.js", el cual devolverá los datos del nuevo producto
     que se desea agregar. El estatus "200" indica que la petición fue exitosa. */
-    const newProduct = await service.create(body);
+      const newProduct = await service.create(body);
 
-    /* El método "json()" convierte un objeto JSON en un objeto JavaScript. A pesar de su nombre,
+      /* El método "json()" convierte un objeto JSON en un objeto JavaScript. A pesar de su nombre,
   este método no convierte un objeto en JSON, sino que convierte un objeto JSON en objeto JavaScript. */
-    /*
+      /*
   El objeto "res" devolverá los siguientes atributos:
     message: mensaje que se mostrará.
     data: cuerpo (body) con los datos que serán enviados como respuesta. */
 
-    res.status(200).json(newProduct);
+      res.status(200).json(newProduct);
+    } catch (err) {
+      next(err);
+    }
   }
 );
 
@@ -456,15 +460,19 @@ router.put(
   '/:id',
   validatorHandler(getProductSchema, 'params'),
   validatorHandler(updateProductSchema, 'body'),
-  async (req, res) => {
-    const body = req.body;
-    /* Se utiliza la destructuración para obtener el valor del parámetro "id" (:id) que fue
+  async (req, res, next) => {
+    try {
+      const body = req.body;
+      /* Se utiliza la destructuración para obtener el valor del parámetro "id" (:id) que fue
   enviado mediante la URL. */
-    const { id } = req.params;
-    /* Se accede al método "update" de la instancia de servicio llamada "service", es decir, se invoca el método "update" del archivo
+      const { id } = req.params;
+      /* Se accede al método "update" de la instancia de servicio llamada "service", es decir, se invoca el método "update" del archivo
     de servicio llamado "productService.js". */
-    const product = await service.update(id, body);
-    res.json(product);
+      const product = await service.update(id, body);
+      res.json(product);
+    } catch (err) {
+      next(err);
+    }
   }
 );
 
@@ -523,18 +531,27 @@ router.patch(
 
 /* ****************************** Método DELETE ****************************** */
 
-router.delete('/:id', async (req, res) => {
-  /* Como se está eliminando un registro, no se envía ningún contenido dentro del elemento "Body". */
-  // const body = req.body;
+router.delete(
+  '/:id',
+  validatorHandler(getProductSchema, 'params'),
+  async (req, res, next) => {
+    /* Como se está eliminando un registro, no se envía ningún contenido dentro del elemento "Body". */
+    // const body = req.body;
 
-  /* Se utiliza la destructuración para obtener el valor del parámetro "id" (:id) que fue
+    /* Se utiliza la destructuración para obtener el valor del parámetro "id" (:id) que fue
   enviado mediante la URL. */
-  const { id } = req.params;
-  /* Se accede al método "delete" de la instancia de servicio llamada "service". */
-  const confirmDelete = await service.delete(id);
 
-  res.json(confirmDelete);
-});
+    try {
+      const { id } = req.params;
+      /* Se accede al método "delete" de la instancia de servicio llamada "service". */
+      const confirmDelete = await service.delete(id);
+
+      res.status(201).json(confirmDelete);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 /* Se exporta la constante "router" como un módulo. */
 module.exports = router;

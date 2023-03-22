@@ -54,8 +54,8 @@ const image =
 const categoryId = Joi.number().integer();
 
 /* Estas dos constantes servirán para filtrar los productos con base en un precio mínimo y un máximo.*/
-const price_min = Joi.number().integer().min(10);
-const price_max = Joi.number().integer().min(10);
+const price_min = Joi.number().integer();
+const price_max = Joi.number().integer();
 
 /* Estas constantes servirán para controlar la paginación. */
 /*

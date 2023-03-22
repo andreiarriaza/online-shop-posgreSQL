@@ -46,7 +46,7 @@ const OrderSchema = {
     get() {
       /* Se comprueba si el tamaño o la cantidad (this.items.length) de items que se encuentran dentro de la asociación (relación) "items" es
       mayor a 0, lo que significaría que sí hay "items" almacenados en la tabla "products". */
-      if (this.items.length > 0) {
+      if (this.items && this.items.length > 0) {
         /*
         El método reduce () ejecuta una función reductora sobre cada elemento de un array, devolviendo como resultado un único valor.
         El método "reduce()" se encargará de recorrer cada "item" de la asocicación "items" y luego se encargará de
