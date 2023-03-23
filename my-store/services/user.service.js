@@ -208,15 +208,15 @@ class UserService {
 
     Simplemente se invoca nuevamente la función "findOne()" que fue creada arriba en este mismo archivo.
     */
-    const user = await this.findOne(id);
+    //const user = await this.findOne(id);
     /*
     El método "destroy" forma parte de la librería "Sequelize" y permite eliminar un registro de la tabla "USER_TABLE". Dicha tabla fue creada en el mismo archivo dentro del cual se creó el modelo llamado "User", es decir, en el archivo "user.model.js".
 
     IMPORTANTE: tanto con el método "update", como con el método "destroy" de la librería "Sequelize", es indispensable enviar también el atributo "where" con el id del elemento que se quiere actualizar o eliminar.
     */
-    await user.destroy({ where: { id } });
+    const response = await models.User.destroy({ where: { id } });
     /* Se retorna el "id" del registro que fue eliminado.*/
-    return user;
+    return response;
   }
 }
 
