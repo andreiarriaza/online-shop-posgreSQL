@@ -2310,7 +2310,7 @@ En la documentación de _**Sequelize**_ se pueden revisar los comandos que permi
 
 El link es el siguiente: https://sequelize.org/docs/v6/core-concepts/model-querying-basics/
 
-## Subir proyecto a producción con [Raleway](https://railway.app/)
+## Subir proyecto a producción con [Railway](https://railway.app/)
 
 Para subir un proyecto a producción, utilizando _\*Railway\*\*_, se deben seguir los siguientes pasos:
 
@@ -2324,24 +2324,6 @@ Para subir un proyecto a producción, utilizando _\*Railway\*\*_, se deben segui
 
 ```js
 
-
-/* Los valores de stas variables deben ser los mismos que los valores
-que se encuentran en la pesataña "connect" de la base de datos.
-
-Por ejemplo, el valor de la variable de entorno "DB_HOST", debe ser el mismo que el valor de la variable de entorno "PGHOST", y así sucesivamente. La única excepción es la variable "DATABASE_URL"; esta variable es única y toma su valor del valor que se halla dentro de la ficha "connect" de la base de datos. */
-
-
-DB_HOST *******
-
-DB_NAME *******
-
-DB_PASSWORD *******
-
-DB_PORT *******
-
-DB_USER *******
-
-PORT ******
 
 
 
@@ -2372,57 +2354,11 @@ Estas variables son las mismas que se crearon en el archivo _**config.js**_. Los
 
 8. Dar clic derecho en un área vacía del _**Dashboard**_ y seleccionar la opción _**Add to database**_. Elegir la base de datos deseada, en este caso, se seleccionará _**Add PostgreSQL**_.
 
-9. Cuando se agregue la base de datos, se debe dar clic en ella. En este caso, se debe dar clic sobre la base de datos llamada "Postgres", y luego dar clic sobre la ficha _**connect**_. Dentro de ella se encontrarán las variables de entorno utilizadas por _**Raleway**_ que están asociadas a dicha base de datos. En este ejemplo, sus valores son los siguientes:
+9. Si se necesita cambiar el nombre de la base de datos, se debe dar clic en ella, luego seleccionar la ficha _**Settings**_, y luego buscar la casilla llamada "Plugin Name", y asignar el nombre deseado. En este caso, se asignó también el nombre _**my_store**_.
 
-```json
-DATABASE_URL    postgresql://ostgres:oxdFXLVctUgKyw9g5tQc@containers-us-west-165.railway.app:8007/railway
-
-PGDATABASE      railway
-
-PGHOST          containers-us-west-165.railway.app
-
-PGPASSWORD      oxdFXLVctUgKyw9g5tQc
-
-PGPORT          8007
-
-PGUSER         postgres
-
-```
-
-11. Si se necesita cambiar el nombre de la base de datos, se debe dar clic en ella, luego seleccionar la ficha _**Settings**_, y luego buscar la casilla llamada "Plugin Name", y asignar el nombre deseado. En este caso, se asignó también el nombre _**my_store**_.
-
-12. Para conectar la base de datos "my_store" con nuestra aplicación, es necesario agregar dentro de la aplicación las siguientes variables de entorno:
+10. Para conectar la base de datos "my_store" con nuestra aplicación, es necesario agregar dentro de la aplicación las siguientes variables de entorno:
 
 ```js
-
-
-/* Los valores de stas variables deben ser los mismos que los valores
-que se encuentran en la pesataña "connect" de la base de datos.
-
-Por ejemplo, el valor de la variable de entorno "DB_HOST", debe ser el mismo que el valor de la variable de entorno "PGHOST", y así sucesivamente. La única excepción es la variable "DATABASE_URL"; esta variable es única y toma su valor del valor que se halla dentro de la ficha "connect" de la base de datos.
-
-
-IMPORTANTE: aunque pareciera que los valores de las variables relacionadas no son los mismos; por ejemplo:
-
-DB_HOST    containers-us-west-165.railway.app
-PGHOST     ${{my_store.PGHOST}}
-
-Realmente si tienen asignado el mismo valor. Pues "containers-us-west-165.railway.app" es el valor de la variable "PGHOST" de la base de datos "my_store". Pero esto equivale a escribir lo siguiente: ${{my_store.PGHOST}} pues acá también se está accediendo a la variable "PGHOST" de la base de datos "my_store".
-*/
-
-
-DB_HOST containers-us-west-165.railway.app
-
-DB_NAME railway
-
-DB_PASSWORD oxdFXLVctUgKyw9g5tQc
-
-DB_PORT 8007
-
-DB_USER postgres
-
-PORT 3000
-
 
 
 /*
@@ -2432,6 +2368,19 @@ de los valores que se encuentran en la ficha "connect" de la base de datos
 agregada.
 
 ${{my_store.DATABASE_URL}}  Esto indica que se quiere acceder al valor de la variable "DATABASE_URL", que se encuentra dentro de la base de datos "my_store". Es otra manera de definir los valores de las variables, nombrando la variable y la base de datos en la que se encuentra.
+
+Estas variables se pueden agregar de forma sencilla siguiendo los pasos indicados:
+
+1. Dar clic en la sección "Variables" de la aplicación; en este caso, dentro de la aplicación "online-shop-postgreSQL".
+2. Dar clic en el botón "New Variable".
+3. Al comenzar a escribir el nombre de alguna de las variables que se encuentran a continuación, se mostrarán automáticamente todas las variables
+   relacionadas con la base de datos, solo es necesario elegir la deseada, y automáticamente se agregará el valor correspondiente.
+
+   Por ejemplo:
+
+      PGDATABASE ${{my_store.PGDATABASE}}
+
+4. Guardar la variable.
 */
 
 
@@ -2451,9 +2400,24 @@ PGUSER ${{my_store.PGUSER}}
 
 ```
 
-13. Para ejecutar comandos en nuestra APP de Railway desde la consola, hay dos maneras:
+**IMPORTANTE:** No es necesario agregar las siguientes variables del archivo _**config/config.js** porque ya fueron incluidas dentro de la variable
+_**DATABASE_URL**\_ por Railway automáticamente:
 
-**Primera forma:** instalar el C**_LI de Railway_** para poder ejecutar comandos _**Railway**_ desde la consola, realizando los siguientes pasos:
+```js
+DB_USER = "walter";
+
+PORT = 3000;
+
+DB_PASSWORD = "123";
+DB_HOST = "localhost";
+DB_NAME = "my_store";
+
+DB_PORT = "5432";
+```
+
+11. Para ejecutar comandos en nuestra APP de Railway desde la consola, hay dos maneras:
+
+**Primera forma:** instalar el **_CLI de Railway_** para poder ejecutar comandos _**Railway**_ desde la consola, realizando los siguientes pasos:
 
 - Ejecutar en la consola de la computadora: `npm i -g @railway/cli`
 - Autenticarse en Railway, ejecutando el siguiente comando: `railway login`
@@ -2463,10 +2427,10 @@ PGUSER ${{my_store.PGUSER}}
 railway run comando
 `
 
-                                  En este caso, sería:
-                                  ```bash
-                                  railway run node index.js
-                                  ```
+                                                  En este caso, sería:
+                                                  ```bash
+                                                  railway run node index.js
+                                                  ```
 
   **Segunda forma:** dentro de Railway hacer lo siguiente:
 
@@ -2481,7 +2445,7 @@ Ejemplo:
 npm node index.js
 ```
 
-14. Ahora es necesario ejecutar las migraciones que se encargarán de crear todas las tablas de la base de datos, y esto se consigue mediante los siguientes comandos:
+12. Ahora es necesario ejecutar las migraciones que se encargarán de crear todas las tablas de la base de datos, y esto se consigue mediante los siguientes comandos:
 
 **Primera Forma:** Si se usa la primera forma (desde la consola de la computadora local) sería el siguiente:
 
@@ -2495,7 +2459,7 @@ railway run npm run migrations:run
 npm run migrations:run
 ```
 
-15. Por último, ejecutar nuestra app:
+13. Por último, ejecutar nuestra app:
     **Primera Forma:** Si se usa la primera forma (desde la consola de la computadora local) sería el siguiente:
 
 ```
@@ -2508,7 +2472,15 @@ railway run node index.js
 node index.js
 ```
 
-16. Para modificar el dominio con el que se mostrará la App, es necesario seleccionar la App; luego, seleccionar _**Settings**_ y buscar la opción _**Domains**_, desde allí se puede modificar el dominio que nos servirá para acceder a la App. En este caso, el dominio es:
+o bien
+
+```bash
+npm run start
+```
+
+**IMPORTANTE:** si no se ejecuta uno de los siguientes comandos: `node index.js` o `npm run start`, la aplicación devolverá un **Error de servidor**. Es indispensable iniciar la aplicación para que esta funcione.
+
+14. Para modificar el dominio con el que se mostrará la App, es necesario seleccionar la App; luego, seleccionar _**Settings**_ y buscar la opción _**Domains**_, desde allí se puede modificar el dominio que nos servirá para acceder a la App. En este caso, el dominio es:
 
 `online-shop-posgresql.up.railway.app`
 
@@ -2516,7 +2488,7 @@ Esto significa que la URL que nos permitirá probar nuestra aplicación, será:
 
 `https://online-shop-posgresql.up.railway.app/api/v1/`
 
-16. Finalmente, ahora se pueden realizar las pruebas desde _**POSTMAN**_ hacia la api, realizando lo siguiente por medio de los enpoints que correspondan:
+15. Finalmente, ahora se pueden realizar las pruebas desde _**POSTMAN**_ hacia la api, realizando lo siguiente por medio de los enpoints que correspondan:
 
 - Agregar una categoría:
   `https://online-shop-posgresql.up.railway.app/api/v1/categories/`
